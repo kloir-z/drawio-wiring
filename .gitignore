@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+.DS_Store
+*.drawio
+!examples/*.drawio
+*.swp
+*.swo
+*.png
+!docs/*.png
+*.jpg
+exp.txt
+sandbox/
+tools/node_modules/
+tools/package-lock.json
