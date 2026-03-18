@@ -20,32 +20,34 @@ drawio_infra_py/
 │   ├── routing.py              ← Router 基底 + NaiveRouter, LeftEdgeRouter, ObstacleRouter
 │   ├── layout.py               ← compute_layout()（Sugiyama法 自動レイアウト）
 │   └── graph.py                ← Topology クラス（高レベルグラフ → 自動レイアウト）
+├── examples/
+│   ├── datacenter.py           ← 大規模サンプル（24機器, 100本ケーブル）
+│   └── datacenter.drawio       ← 生成済みサンプル出力
 ├── tests/
 │   ├── test_diagram.py         ← XML構造テスト
-│   └── test_routing.py         ← ルーティング特性テスト
-├── sandbox/
-│   ├── XX_name/                ← 図ごとのサブディレクトリ
-│   │   ├── gen_name.py         ← 生成スクリプト
-│   │   └── name.drawio         ← 出力（.gitignore 済み）
-│   ├── 09_combined/            ← 統合配線図（Topology API デモ）
-│   └── 10_storage/             ← ストレージ配線図（3段ネストデモ）
+│   ├── test_routing.py         ← ルーティング特性テスト
+│   └── test_topology.py        ← Topology API テスト
+├── docs/
+│   ├── prompt_template.md      ← AI向けプロンプトテンプレート
+│   └── datacenter.png          ← README 用スクリーンショット
+├── sandbox/                    ← 実験用（.gitignore 済み）
 └── tools/                      ← プレビュー等のユーティリティ
 ```
 
 ## コマンド
 
 ```bash
-# 図を生成する
-python3 sandbox/07_onprem/gen_wiring.py
+# サンプル図を生成する
+python3 examples/datacenter.py
 
 # テスト実行
 python3 -m unittest discover -s tests
 
 # .drawio → PNG プレビュー（要: npm install --prefix tools puppeteer-core）
-node tools/drawio_to_png.mjs sandbox/07_onprem/wiring.drawio
+node tools/drawio_to_png.mjs examples/datacenter.drawio
 
 # 生成 + プレビュー一括実行
-bash tools/preview.sh sandbox/07_onprem/gen_wiring.py
+bash tools/preview.sh examples/datacenter.py
 
 # ライブラリの API ドキュメント
 head -30 lib/wiring_diagram/__init__.py
@@ -53,9 +55,10 @@ head -30 lib/wiring_diagram/__init__.py
 
 ## 新しい図を追加する手順
 
-1. `sandbox/NN_name/` ディレクトリを作成
-2. `gen_name.py` を書く（先頭で `sys.path.insert(0, '/home/user/code/drawio_infra_py/lib')` してから `from wiring_diagram import Diagram, nid` ）
-3. `D.save("sandbox/NN_name/name.drawio")` で出力
+1. スクリプトを作成（`sandbox/` 以下は gitignore 済みなので自由に使える）
+2. 先頭で `sys.path.insert(0, '/home/user/code/drawio_infra_py/lib')` してから `from wiring_diagram import Topology, ObstacleRouter` 等を import
+3. `D.save("output.drawio")` で出力
+4. 公開用サンプルにする場合は `examples/` に配置
 
 ## ライブラリ API
 

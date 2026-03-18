@@ -57,7 +57,7 @@ D.save("output.drawio")
 
 | メソッド | 説明 |
 |----------|------|
-| `add_device(id, label, style, layer, ports=[], cards=[])` | デバイス追加（flat またはカード構造） |
+| `add_device(id, label, style, layer, ports=[], cards=[], controllers=[])` | デバイス追加（flat / カード / 3段ネスト） |
 | `add_cable(src_dev, src_port, dst_dev, dst_port, style, label="", layer=None)` | ケーブル追加 |
 | `add_simple_link(src_dev, dst_dev, label, style, layer=None)` | 直結リンク追加（StackWise 等） |
 | `to_diagram(router=None, cable_layers=False, ...)` | 自動レイアウトして Diagram を返す |
@@ -67,7 +67,7 @@ D.save("output.drawio")
 | メソッド | 説明 |
 |----------|------|
 | `device(id, label, x, y, ports, style)` | スイッチ等（ポート横1列） |
-| `device_carded(id, label, x, y, cards, style)` | サーバ（NIC カード構造） |
+| `device_carded(id, label, x, y, cards/controllers, style)` | サーバ（2段カード / 3段ネスト） |
 | `add_edge(..., zone=None, layer=None)` | ケーブルをキュー登録 |
 | `simple_edge(src_id, tgt_id, label, style, layer=None)` | 直結エッジ |
 | `add_layer(name)` | draw.io レイヤー追加 |

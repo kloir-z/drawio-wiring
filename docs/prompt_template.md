@@ -245,7 +245,7 @@ D.legend([
 1. **サイズは px で指定する** — 「小さめ」は曖昧、「16x14px」は一意
 2. **未使用ポートの扱いを明記する** — 全表示 or 使用中のみ
 3. **参考画像があれば添付する** — 手書きスケッチでも効果大
-4. **ライブラリの既存スクリプトを読ませる** — `sandbox/09_combined/gen_combined.py` を先に読ませると出力の形式が合う
+4. **ライブラリの既存スクリプトを読ませる** — `examples/datacenter.py` を先に読ませると出力の形式が合う
 5. **Topology API ならレイアウト指定不要** — layer= だけで上下配置が決まる
 6. **ObstacleRouter でケーブル迂回は自動** — デバイスボックスを避けてルーティングされる
 
@@ -337,11 +337,8 @@ port_style(color_name, bold=False)
 | `page_w` | auto | ページ幅（None で自動計算） |
 | `page_h` | auto | ページ高さ（None で自動計算） |
 
-### サンドボックス参考
+### サンプル参考
 
-| ディレクトリ | 内容 | API |
-|-------------|------|-----|
-| `sandbox/07_onprem/` | オンプレ配線図 | Direct Diagram |
-| `sandbox/08_three_tier/` | 3層ネットワーク（4層、13機器） | Topology + LeftEdgeRouter |
-| `sandbox/09_combined/` | 大規模DC（22機器、66本+StackWise 3本） | Topology + ObstacleRouter |
-| `sandbox/10_storage/` | ストレージ配線（3段ネスト controllers=） | Topology + ObstacleRouter |
+| パス | 内容 | API |
+|------|------|-----|
+| `examples/datacenter.py` | 大規模DC（24機器、100本ケーブル） | Topology + ObstacleRouter |
