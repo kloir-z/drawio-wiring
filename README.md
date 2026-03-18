@@ -2,7 +2,7 @@
 
 Python スクリプトで draw.io 物理配線図を自動生成するライブラリ。外部依存ゼロ（Python 3 標準ライブラリのみ）。
 
-![データセンター配線図の例](docs/datacenter.png)
+![データセンター配線図の例](examples/datacenter.png)
 
 ## 特徴
 

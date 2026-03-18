@@ -22,14 +22,14 @@ drawio_infra_py/
 │   └── graph.py                ← Topology クラス（高レベルグラフ → 自動レイアウト）
 ├── examples/
 │   ├── datacenter.py           ← 大規模サンプル（24機器, 100本ケーブル）
-│   └── datacenter.drawio       ← 生成済みサンプル出力
+│   ├── datacenter.drawio       ← 生成済みサンプル出力
+│   └── datacenter.png          ← README 用スクリーンショット
 ├── tests/
 │   ├── test_diagram.py         ← XML構造テスト
 │   ├── test_routing.py         ← ルーティング特性テスト
 │   └── test_topology.py        ← Topology API テスト
 ├── docs/
-│   ├── prompt_template.md      ← AI向けプロンプトテンプレート
-│   └── datacenter.png          ← README 用スクリーンショット
+│   └── prompt_template.md      ← AI向けプロンプトテンプレート
 ├── sandbox/                    ← 実験用（.gitignore 済み）
 └── tools/                      ← プレビュー等のユーティリティ
 ```

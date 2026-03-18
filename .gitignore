@@ -8,7 +8,7 @@ node_modules/
 *.swp
 *.swo
 *.png
-!docs/*.png
+!examples/*.png
 *.jpg
 exp.txt
 sandbox/
