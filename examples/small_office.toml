@@ -1,6 +1,6 @@
-# small_office.toml — 8 devices, 20 cables (18 routed + 2 StackWise)
+# small_office.toml — 8 devices, 18 cables (16 routed + 2 StackWise)
 #
-# Generate:  python3 tools/toml2drawio.py sandbox/small_office.toml
+# Generate:  python3 tools/toml2drawio.py examples/small_office.toml
 
 [settings]
 router = "obstacle"
@@ -35,7 +35,6 @@ style = "purple"
 ports = [
     { name = "d1", style = "down" },
     { name = "d2", style = "down" },
-    { name = "d3", style = "down" },
 ]
 
 [[devices]]
@@ -46,7 +45,6 @@ style = "purple"
 ports = [
     { name = "d1", style = "down" },
     { name = "d2", style = "down" },
-    { name = "d3", style = "down" },
 ]
 
 # ============================================================================
@@ -159,7 +157,7 @@ ports = [
 ]
 
 # ============================================================================
-# Cables (18 routed)
+# Cables (16 routed)
 # ============================================================================
 
 # -- Core → Access uplinks: 4 (red, dual-homed) -----------------------------
@@ -191,12 +189,6 @@ style = "mgmt"
 src = "acc2.d6"
 dst = "stor1.m1"
 style = "mgmt"
-
-# -- Core → Access: extra cross-links for redundancy: 2 (red) ---------------
-[[cables]]
-src = ["core1.d3", "core2.d3"]
-dst = ["acc2.u1",  "acc1.u1"]
-style = "uplink"
 
 # ============================================================================
 # StackWise links (2)
