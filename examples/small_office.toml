@@ -1,0 +1,212 @@
+# small_office.toml — 8 devices, 20 cables (18 routed + 2 StackWise)
+#
+# Generate:  python3 tools/toml2drawio.py sandbox/small_office.toml
+
+[settings]
+router = "obstacle"
+layer_gap = 220
+device_gap = 30
+cable_layers = true
+
+# ============================================================================
+# Styles
+# ============================================================================
+[edge_styles]
+uplink = { color = "red",    width = 3 }
+data   = { color = "blue",   width = 2 }
+stor   = { color = "orange", width = 2 }
+mgmt   = { color = "purple", width = 1.5, line = "dotted" }
+stack  = { color = "gray",   width = 2,   line = "dashed" }
+
+[port_styles]
+up   = { color = "red" }
+down = { color = "blue" }
+srv  = { color = "green" }
+mgmt = { color = "gray" }
+
+# ============================================================================
+# Layer 0: Core switches (2) — StackWise pair
+# ============================================================================
+[[devices]]
+id = "core1"
+label = "Core-SW-1"
+layer = 0
+style = "purple"
+ports = [
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+]
+
+[[devices]]
+id = "core2"
+label = "Core-SW-2"
+layer = 0
+style = "purple"
+ports = [
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+]
+
+# ============================================================================
+# Layer 1: Access switches (2) — StackWise pair
+# ============================================================================
+[[devices]]
+id = "acc1"
+label = "Acc-SW-1"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+]
+
+[[devices]]
+id = "acc2"
+label = "Acc-SW-2"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+]
+
+# ============================================================================
+# Layer 2: Servers (3) — carded
+# ============================================================================
+[[devices]]
+id = "srv1"
+label = "Server-1"
+layer = 2
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "srv2"
+label = "Server-2"
+layer = 2
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "srv3"
+label = "Server-3"
+layer = 2
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+# ============================================================================
+# Layer 2: Storage (1) — carded
+# ============================================================================
+[[devices]]
+id = "stor1"
+label = "Storage-A"
+layer = 2
+style = "green"
+[[devices.cards]]
+name = "Data"
+ports = [
+    { name = "e0a", style = "srv" },
+    { name = "e0b", style = "srv" },
+]
+[[devices.cards]]
+name = "Mgmt"
+ports = [
+    { name = "m1", style = "mgmt" },
+]
+
+# ============================================================================
+# Cables (18 routed)
+# ============================================================================
+
+# -- Core → Access uplinks: 4 (red, dual-homed) -----------------------------
+[[cables]]
+src = ["core1.d1", "core1.d2", "core2.d1", "core2.d2"]
+dst = ["acc1.u1",  "acc2.u1",  "acc1.u2",  "acc2.u2"]
+style = "uplink"
+
+# -- Access → Server data: 6 (blue, dual-homed) -----------------------------
+[[cables]]
+src = ["acc1.d1", "acc2.d1", "acc1.d2", "acc2.d2", "acc1.d3", "acc2.d3"]
+dst = ["srv1.eth1", "srv1.eth2", "srv2.eth1", "srv2.eth2", "srv3.eth1", "srv3.eth2"]
+style = "data"
+
+# -- Access → Storage data: 2 (orange, dual-homed) --------------------------
+[[cables]]
+src = ["acc1.d4", "acc2.d4"]
+dst = ["stor1.e0a", "stor1.e0b"]
+style = "stor"
+
+# -- Access → Server iDRAC: 3 (purple dotted) -------------------------------
+[[cables]]
+src = ["acc1.d5", "acc1.d6", "acc2.d5"]
+dst = ["srv1.mgmt", "srv2.mgmt", "srv3.mgmt"]
+style = "mgmt"
+
+# -- Access → Storage Mgmt: 1 (purple dotted) -------------------------------
+[[cables]]
+src = "acc2.d6"
+dst = "stor1.m1"
+style = "mgmt"
+
+# -- Core → Access: extra cross-links for redundancy: 2 (red) ---------------
+[[cables]]
+src = ["core1.d3", "core2.d3"]
+dst = ["acc2.u1",  "acc1.u1"]
+style = "uplink"
+
+# ============================================================================
+# StackWise links (2)
+# ============================================================================
+[[simple_links]]
+devices = ["core1", "core2"]
+label = "StackWise"
+style = "stack"
+
+[[simple_links]]
+devices = ["acc1", "acc2"]
+label = "StackWise"
+style = "stack"
