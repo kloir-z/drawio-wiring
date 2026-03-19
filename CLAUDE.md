@@ -22,23 +22,29 @@ drawio_infra_py/
 │   └── graph.py                ← Topology クラス（高レベルグラフ → 自動レイアウト）
 ├── examples/
 │   ├── datacenter.py           ← 大規模サンプル（24機器, 100本ケーブル）
+│   ├── datacenter.toml         ← 同じ構成の TOML 版（toml2drawio 用）
 │   ├── datacenter.drawio       ← 生成済みサンプル出力
 │   └── datacenter.png          ← README 用スクリーンショット
 ├── tests/
 │   ├── test_diagram.py         ← XML構造テスト
 │   ├── test_routing.py         ← ルーティング特性テスト
-│   └── test_topology.py        ← Topology API テスト
+│   ├── test_topology.py        ← Topology API テスト
+│   └── test_toml2drawio.py     ← TOML→drawio 変換テスト
 ├── docs/
 │   └── prompt_template.md      ← AI向けプロンプトテンプレート
 ├── sandbox/                    ← 実験用（.gitignore 済み）
-└── tools/                      ← プレビュー等のユーティリティ
+└── tools/
+    └── toml2drawio.py          ← TOML 定義 → .drawio 変換ツール
 ```
 
 ## コマンド
 
 ```bash
-# サンプル図を生成する
+# サンプル図を生成する（Python スクリプト）
 python3 examples/datacenter.py
+
+# サンプル図を生成する（TOML 定義）
+python3 tools/toml2drawio.py examples/datacenter.toml
 
 # テスト実行
 python3 -m unittest discover -s tests
@@ -54,6 +60,14 @@ head -30 lib/wiring_diagram/__init__.py
 ```
 
 ## 新しい図を追加する手順
+
+### 方法 A: TOML 定義ファイル（推奨）
+
+1. `.toml` ファイルを作成（`examples/datacenter.toml` を参考）
+2. `python3 tools/toml2drawio.py mydiagram.toml` で `.drawio` を生成
+3. `-o output.drawio` で出力先を指定可能
+
+### 方法 B: Python スクリプト
 
 1. スクリプトを作成（`sandbox/` 以下は gitignore 済みなので自由に使える）
 2. 先頭で `sys.path.insert(0, '/home/user/code/drawio_infra_py/lib')` してから `from wiring_diagram import Topology, ObstacleRouter` 等を import
@@ -88,3 +102,21 @@ head -30 lib/wiring_diagram/__init__.py
 | `T.add_cable(...)` | ケーブル追加 |
 | `T.add_simple_link(...)` | 直結リンク追加（StackWise等） |
 | `T.to_diagram(...)` | 自動レイアウトして Diagram を返す |
+
+## TOML → drawio 変換ツール
+
+`tools/toml2drawio.py` は TOML 定義ファイルから `.drawio` を生成する。Python 3.11 の `tomllib`（標準ライブラリ）を使用。
+
+### TOML スキーマ概要
+
+| セクション | 用途 |
+|-----------|------|
+| `[settings]` | `router`, `layer_gap`, `device_gap`, `cable_layers` 等のレイアウト設定 |
+| `[edge_styles]` | 名前付きエッジスタイル定義（`color`, `width`, `line`） |
+| `[port_styles]` | 名前付きポートスタイル定義（`color`, `bold`） |
+| `[[devices]]` | デバイス定義（`ports` / `cards` / `controllers` で構造指定） |
+| `[[cables]]` | ケーブル定義（`src`, `dst` はリストで一括指定可） |
+| `[[simple_links]]` | StackWise等の直結リンク |
+| `[[legend]]` | 凡例エントリ |
+
+色名は PALETTE の16色（`red`, `blue`, `green` 等）、背景は6色（`yellow`, `green`, `purple`, `red`, `blue`, `gray`）。生の draw.io スタイル文字列（`=` 含む）も直接使用可。

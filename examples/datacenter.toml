@@ -1,0 +1,783 @@
+# datacenter.toml — 24 devices, 100 cables (97 routed + 3 StackWise)
+#
+# Generate:  python3 tools/toml2drawio.py examples/datacenter.toml
+
+[settings]
+router = "obstacle"
+layer_gap = 220
+device_gap = 25
+cable_layers = true
+
+# ============================================================================
+# Edge styles
+# ============================================================================
+[edge_styles]
+core  = { color = "red",    width = 3 }
+acc   = { color = "blue",   width = 2 }
+svc   = { color = "orange", width = 2 }
+data  = { color = "green",  width = 2 }
+vm    = { color = "teal",   width = 2 }
+mgmt  = { color = "purple", width = 1.5, line = "dotted" }
+stack = { color = "gray",   width = 2,   line = "dashed" }
+
+# ============================================================================
+# Port styles
+# ============================================================================
+[port_styles]
+up   = { color = "red" }
+down = { color = "blue" }
+srv  = { color = "green" }
+mgmt = { color = "gray" }
+
+# ============================================================================
+# Layer 0: Core switches (2)
+# ============================================================================
+[[devices]]
+id = "core1"
+label = "Core-SW-1"
+layer = 0
+style = "purple"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+    { name = "d7", style = "down" },
+    { name = "d8", style = "down" },
+]
+
+[[devices]]
+id = "core2"
+label = "Core-SW-2"
+layer = 0
+style = "purple"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+    { name = "d7", style = "down" },
+    { name = "d8", style = "down" },
+]
+
+# ============================================================================
+# Layer 1: Distribution (2) + Service (2)
+# ============================================================================
+[[devices]]
+id = "dist1"
+label = "Dist-SW-1"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+    { name = "d7", style = "down" },
+]
+
+[[devices]]
+id = "dist2"
+label = "Dist-SW-2"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+    { name = "d7", style = "down" },
+]
+
+[[devices]]
+id = "svc1"
+label = "Svc-SW-1"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+    { name = "d7", style = "down" },
+    { name = "d8", style = "down" },
+    { name = "d9", style = "down" },
+    { name = "d10", style = "down" },
+    { name = "d11", style = "down" },
+    { name = "d12", style = "down" },
+    { name = "d13", style = "down" },
+    { name = "d14", style = "down" },
+    { name = "d15", style = "down" },
+    { name = "d16", style = "down" },
+    { name = "d17", style = "down" },
+    { name = "d18", style = "down" },
+    { name = "d19", style = "down" },
+    { name = "d20", style = "down" },
+    { name = "d21", style = "down" },
+]
+
+[[devices]]
+id = "svc2"
+label = "Svc-SW-2"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+    { name = "d6", style = "down" },
+    { name = "d7", style = "down" },
+    { name = "d8", style = "down" },
+    { name = "d9", style = "down" },
+    { name = "d10", style = "down" },
+    { name = "d11", style = "down" },
+    { name = "d12", style = "down" },
+    { name = "d13", style = "down" },
+    { name = "d14", style = "down" },
+    { name = "d15", style = "down" },
+    { name = "d16", style = "down" },
+    { name = "d17", style = "down" },
+    { name = "d18", style = "down" },
+    { name = "d19", style = "down" },
+    { name = "d20", style = "down" },
+    { name = "d21", style = "down" },
+]
+
+# ============================================================================
+# Layer 2: Access (4) + Management (2)
+# ============================================================================
+[[devices]]
+id = "acc1"
+label = "Access-1"
+layer = 2
+style = "green"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+]
+
+[[devices]]
+id = "acc2"
+label = "Access-2"
+layer = 2
+style = "green"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+]
+
+[[devices]]
+id = "acc3"
+label = "Access-3"
+layer = 2
+style = "green"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+]
+
+[[devices]]
+id = "acc4"
+label = "Access-4"
+layer = 2
+style = "green"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+]
+
+[[devices]]
+id = "mgmt1"
+label = "Mgmt-SW-1"
+layer = 2
+style = "green"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "d1", style = "mgmt" },
+    { name = "d2", style = "mgmt" },
+    { name = "d3", style = "mgmt" },
+    { name = "d4", style = "mgmt" },
+    { name = "d5", style = "mgmt" },
+    { name = "d6", style = "mgmt" },
+    { name = "d7", style = "mgmt" },
+    { name = "d8", style = "mgmt" },
+]
+
+[[devices]]
+id = "mgmt2"
+label = "Mgmt-SW-2"
+layer = 2
+style = "green"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "d1", style = "mgmt" },
+    { name = "d2", style = "mgmt" },
+    { name = "d3", style = "mgmt" },
+    { name = "d4", style = "mgmt" },
+    { name = "d5", style = "mgmt" },
+    { name = "d6", style = "mgmt" },
+    { name = "d7", style = "mgmt" },
+    { name = "d8", style = "mgmt" },
+]
+
+# ============================================================================
+# Layer 3: Storage (3) — carded
+# ============================================================================
+[[devices]]
+id = "stor1"
+label = "Storage-A"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "iSCSI"
+ports = [
+    { name = "e0a", style = "srv" },
+    { name = "e0b", style = "srv" },
+]
+[[devices.cards]]
+name = "NFS"
+ports = [
+    { name = "e1a", style = "srv" },
+    { name = "e1b", style = "srv" },
+]
+[[devices.cards]]
+name = "Mgmt"
+ports = [
+    { name = "m1", style = "mgmt" },
+]
+
+[[devices]]
+id = "stor2"
+label = "Storage-B"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "iSCSI"
+ports = [
+    { name = "e0a", style = "srv" },
+    { name = "e0b", style = "srv" },
+]
+[[devices.cards]]
+name = "NFS"
+ports = [
+    { name = "e1a", style = "srv" },
+    { name = "e1b", style = "srv" },
+]
+[[devices.cards]]
+name = "Mgmt"
+ports = [
+    { name = "m1", style = "mgmt" },
+]
+
+[[devices]]
+id = "stor3"
+label = "Storage-C"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "iSCSI"
+ports = [
+    { name = "e0a", style = "srv" },
+    { name = "e0b", style = "srv" },
+]
+[[devices.cards]]
+name = "NFS"
+ports = [
+    { name = "e1a", style = "srv" },
+    { name = "e1b", style = "srv" },
+]
+[[devices.cards]]
+name = "Mgmt"
+ports = [
+    { name = "m1", style = "mgmt" },
+]
+
+# ============================================================================
+# Layer 3: Servers (4) — carded
+# ============================================================================
+[[devices]]
+id = "srv1"
+label = "Server-1"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "srv2"
+label = "Server-2"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "srv3"
+label = "Server-3"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "srv4"
+label = "Server-4"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+# ============================================================================
+# Layer 3: VM Hosts (3) — carded
+# ============================================================================
+[[devices]]
+id = "vmh1"
+label = "VM-Host-1"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe3"
+ports = [
+    { name = "p3a", style = "srv" },
+    { name = "p3b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "vmh2"
+label = "VM-Host-2"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe3"
+ports = [
+    { name = "p3a", style = "srv" },
+    { name = "p3b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "vmh3"
+label = "VM-Host-3"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "OCP"
+ports = [
+    { name = "ocp1", style = "srv" },
+    { name = "ocp2", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe1"
+ports = [
+    { name = "p1a", style = "srv" },
+    { name = "p1b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe2"
+ports = [
+    { name = "p2a", style = "srv" },
+    { name = "p2b", style = "srv" },
+]
+[[devices.cards]]
+name = "PCIe3"
+ports = [
+    { name = "p3a", style = "srv" },
+    { name = "p3b", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+# ============================================================================
+# Layer 3: Auth (2) — carded
+# ============================================================================
+[[devices]]
+id = "auth1"
+label = "Auth-1"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "NIC2"
+ports = [
+    { name = "eth3", style = "srv" },
+    { name = "eth4", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "auth2"
+label = "Auth-2"
+layer = 3
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "NIC2"
+ports = [
+    { name = "eth3", style = "srv" },
+    { name = "eth4", style = "srv" },
+]
+[[devices.cards]]
+name = "iDRAC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+# ============================================================================
+# Cables (97 routed)
+# ============================================================================
+
+# -- Core → Dist: 4 (red) ---------------------------------------------------
+[[cables]]
+src = ["core1.d1", "core1.d2", "core2.d1", "core2.d2"]
+dst = ["dist1.u1", "dist2.u1", "dist1.u2", "dist2.u2"]
+style = "core"
+
+# -- Core → Svc: 4 (red) ----------------------------------------------------
+[[cables]]
+src = ["core1.d3", "core1.d4", "core2.d3", "core2.d4"]
+dst = ["svc1.u1",  "svc2.u1",  "svc1.u2",  "svc2.u2"]
+style = "core"
+
+# -- Core → Mgmt uplink: 2 (red) --------------------------------------------
+[[cables]]
+src = ["core1.d5", "core2.d5"]
+dst = ["mgmt1.u1", "mgmt2.u1"]
+style = "core"
+
+# -- Core → Server PCIe2: 4 (red) -------------------------------------------
+[[cables]]
+src = ["core1.d6", "core2.d6", "core1.d7", "core2.d7"]
+dst = ["srv1.p2a", "srv2.p2a", "srv3.p2a", "srv4.p2a"]
+style = "core"
+
+# -- Core → VM Host PCIe2: 2 (red) ------------------------------------------
+[[cables]]
+src = ["core1.d8", "core2.d8"]
+dst = ["vmh1.p2a", "vmh2.p2a"]
+style = "core"
+
+# -- Dist → Access: 8 (blue, dual-homed) ------------------------------------
+[[cables]]
+src = ["dist1.d1", "dist1.d2", "dist1.d3", "dist1.d4",
+       "dist2.d1", "dist2.d2", "dist2.d3", "dist2.d4"]
+dst = ["acc1.u1",  "acc2.u1",  "acc3.u1",  "acc4.u1",
+       "acc1.u2",  "acc2.u2",  "acc3.u2",  "acc4.u2"]
+style = "acc"
+
+# -- Dist → Server PCIe2: 4 (blue) ------------------------------------------
+[[cables]]
+src = ["dist1.d5", "dist2.d5", "dist1.d6", "dist2.d6"]
+dst = ["srv1.p2b", "srv2.p2b", "srv3.p2b", "srv4.p2b"]
+style = "acc"
+
+# -- Dist → VM Host PCIe1: 2 (blue) -----------------------------------------
+[[cables]]
+src = ["dist1.d7", "dist2.d7"]
+dst = ["vmh2.p1b", "vmh3.p2b"]
+style = "acc"
+
+# -- Svc → Storage iSCSI: 6 (orange) ----------------------------------------
+[[cables]]
+src = ["svc1.d1", "svc1.d2", "svc1.d3", "svc2.d1", "svc2.d2", "svc2.d3"]
+dst = ["stor1.e0a", "stor2.e0a", "stor3.e0a", "stor1.e0b", "stor2.e0b", "stor3.e0b"]
+style = "svc"
+
+# -- Svc → Storage NFS: 6 (orange) ------------------------------------------
+[[cables]]
+src = ["svc1.d4", "svc1.d5", "svc1.d6", "svc2.d4", "svc2.d5", "svc2.d6"]
+dst = ["stor1.e1a", "stor2.e1a", "stor3.e1a", "stor1.e1b", "stor2.e1b", "stor3.e1b"]
+style = "svc"
+
+# -- Svc → Server OCP: 8 (green) --------------------------------------------
+[[cables]]
+src = ["svc1.d7",  "svc2.d7",  "svc1.d8",  "svc2.d8",
+       "svc1.d9",  "svc2.d9",  "svc1.d10", "svc2.d10"]
+dst = ["srv1.ocp1", "srv1.ocp2", "srv2.ocp1", "srv2.ocp2",
+       "srv3.ocp1", "srv3.ocp2", "srv4.ocp1", "srv4.ocp2"]
+style = "data"
+
+# -- Svc → Server PCIe1: 8 (green) ------------------------------------------
+[[cables]]
+src = ["svc1.d11", "svc2.d11", "svc1.d12", "svc2.d12",
+       "svc1.d13", "svc2.d13", "svc1.d14", "svc2.d14"]
+dst = ["srv1.p1a", "srv1.p1b", "srv2.p1a", "srv2.p1b",
+       "srv3.p1a", "srv3.p1b", "srv4.p1a", "srv4.p1b"]
+style = "data"
+
+# -- Svc → VM Host OCP: 4 (teal) --------------------------------------------
+[[cables]]
+src = ["svc1.d15", "svc2.d15", "svc1.d16", "svc2.d16"]
+dst = ["vmh1.ocp1", "vmh1.ocp2", "vmh2.ocp1", "vmh2.ocp2"]
+style = "vm"
+
+# -- Svc → VM Host OCP + PCIe: 5 (teal) -------------------------------------
+[[cables]]
+src = ["svc1.d17", "svc2.d17", "svc1.d18", "svc2.d18", "svc1.d19"]
+dst = ["vmh3.ocp1", "vmh3.ocp2", "vmh1.p3a", "vmh2.p3a", "vmh3.p3a"]
+style = "vm"
+
+# -- Access → Auth NIC1: 4 (blue) -------------------------------------------
+[[cables]]
+src = ["acc1.d1", "acc2.d1", "acc3.d1", "acc4.d1"]
+dst = ["auth1.eth1", "auth1.eth2", "auth2.eth1", "auth2.eth2"]
+style = "acc"
+
+# -- Access → VM Host PCIe1: 4 (teal) ---------------------------------------
+[[cables]]
+src = ["acc1.d2", "acc2.d2", "acc3.d2", "acc4.d2"]
+dst = ["vmh1.p1a", "vmh2.p1a", "vmh3.p1a", "vmh3.p1b"]
+style = "vm"
+
+# -- Access → Auth NIC2: 4 (green) ------------------------------------------
+[[cables]]
+src = ["acc1.d3", "acc2.d3", "acc3.d3", "acc4.d3"]
+dst = ["auth1.eth3", "auth1.eth4", "auth2.eth3", "auth2.eth4"]
+style = "data"
+
+# -- Mgmt1 → Storage OOB: 3 (purple dotted) ---------------------------------
+[[cables]]
+src = ["mgmt1.d1", "mgmt1.d2", "mgmt1.d3"]
+dst = ["stor1.m1",  "stor2.m1",  "stor3.m1"]
+style = "mgmt"
+
+# -- Mgmt1 → Server iDRAC: 4 (purple dotted) --------------------------------
+[[cables]]
+src = ["mgmt1.d4", "mgmt1.d5", "mgmt1.d6", "mgmt1.d7"]
+dst = ["srv1.mgmt", "srv2.mgmt", "srv3.mgmt", "srv4.mgmt"]
+style = "mgmt"
+
+# -- Mgmt1 → Auth iDRAC: 1 (purple dotted) ----------------------------------
+[[cables]]
+src = "mgmt1.d8"
+dst = "auth1.mgmt"
+style = "mgmt"
+
+# -- Mgmt2 → VM Host iDRAC: 3 (purple dotted) -------------------------------
+[[cables]]
+src = ["mgmt2.d1", "mgmt2.d2", "mgmt2.d3"]
+dst = ["vmh1.mgmt", "vmh2.mgmt", "vmh3.mgmt"]
+style = "mgmt"
+
+# -- Mgmt2 → Auth iDRAC: 1 (purple dotted) ----------------------------------
+[[cables]]
+src = "mgmt2.d4"
+dst = "auth2.mgmt"
+style = "mgmt"
+
+# -- Mgmt2 → VM Host PCIe3: 3 (purple dotted) -------------------------------
+[[cables]]
+src = ["mgmt2.d5", "mgmt2.d6", "mgmt2.d7"]
+dst = ["vmh1.p3b",  "vmh2.p3b",  "vmh3.p3b"]
+style = "mgmt"
+
+# -- Mgmt2 → VM Host backup: 1 (purple dotted) ------------------------------
+[[cables]]
+src = "mgmt2.d8"
+dst = "vmh3.p2a"
+style = "mgmt"
+
+# -- Svc → VM Host PCIe remaining: 2 (teal) ---------------------------------
+[[cables]]
+src = ["svc1.d21", "svc2.d21"]
+dst = ["vmh1.p2b", "vmh2.p2b"]
+style = "vm"
+
+# ============================================================================
+# StackWise links (3)
+# ============================================================================
+[[simple_links]]
+devices = ["core1", "core2"]
+label = "StackWise"
+style = "stack"
+
+[[simple_links]]
+devices = ["dist1", "dist2"]
+label = "StackWise"
+style = "stack"
+
+[[simple_links]]
+devices = ["svc1", "svc2"]
+label = "StackWise"
+style = "stack"
