@@ -46,10 +46,8 @@ class NaiveRouter(Router):
         for rank, (orig_i, edge) in enumerate(indexed):
             src_cx, src_cy, tgt_cx, tgt_cy, src_id, tgt_id, style, label = edge
             lane_y = route_y_min + (rank + 1) * route_range / (n + 1)
-            if src_cy <= tgt_cy:
-                exit_y, entry_y = 1, 0
-            else:
-                exit_y, entry_y = 0, 1
+            exit_y = 1 if src_cy <= lane_y else 0
+            entry_y = 1 if tgt_cy <= lane_y else 0
             eid = nid("e")
             cell = ET.SubElement(root, "mxCell", id=eid, value=label,
                 style=(f"edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;"
@@ -308,10 +306,8 @@ class LeftEdgeRouter(Router):
             src_cx, src_cy, tgt_cx, tgt_cy, src_id, tgt_id, style, label = edge
             lane_y = route_y_min + (lane_idx + 1) * route_range / (n_lanes + 1)
 
-            if src_cy <= tgt_cy:
-                exit_y, entry_y = 1, 0
-            else:
-                exit_y, entry_y = 0, 1
+            exit_y = 1 if src_cy <= lane_y else 0
+            entry_y = 1 if tgt_cy <= lane_y else 0
 
             eid = nid("e")
             cell = ET.SubElement(root, "mxCell", id=eid, value=label,
@@ -665,7 +661,7 @@ class ObstacleRouter(Router):
     DETECT_MARGIN = 0    # X-overlap margin for blocking detection (strict interior)
     DETOUR_PITCH = 6     # spacing between successive detour lines (px)
     VERTICAL_PITCH = 6   # X offset between overlapping vertical segments (px)
-    VERTICAL_TOLERANCE = 12  # X tolerance for grouping vertical segments (px)
+    VERTICAL_TOLERANCE = 3   # X tolerance for grouping vertical segments (px)
 
     def build_edge_data(self, edges, route_y_min, route_y_max,
                         obstacles=None, parent_ids=None):
@@ -700,10 +696,8 @@ class ObstacleRouter(Router):
             src_cx, src_cy, tgt_cx, tgt_cy, src_id, tgt_id, style, label = edge
             lane_y = route_y_min + (lane_idx + 1) * route_range / (n_lanes + 1)
 
-            if src_cy <= tgt_cy:
-                exit_y, entry_y = 1, 0
-            else:
-                exit_y, entry_y = 0, 1
+            exit_y = 1 if src_cy <= lane_y else 0
+            entry_y = 1 if tgt_cy <= lane_y else 0
 
             waypoints = []
 

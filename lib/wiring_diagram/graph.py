@@ -340,12 +340,28 @@ class Topology:
             zone_key = None
             if src_layer is not None and dst_layer is not None:
                 a, b = min(src_layer, dst_layer), max(src_layer, dst_layer)
-                zone = layout['zones'].get((a, b))
-                if zone is None:
-                    for la in range(a, b):
-                        zone = layout['zones'].get((la, la + 1))
-                        if zone:
-                            break
+                if a == b:
+                    # Same-layer cable: pick zone below or above based on
+                    # port Y positions relative to device centre.
+                    mid_y = (s_cy + d_cy) / 2
+                    dev_placements = layout['devices']
+                    src_p = dev_placements[cable.src_device]
+                    dev_mid_y = src_p['y'] + src_p['h'] / 2
+                    if mid_y >= dev_mid_y:
+                        # Ports near bottom → prefer zone below
+                        zone = (layout['zones'].get((a, a + 1))
+                                or layout['zones'].get((a - 1, a)))
+                    else:
+                        # Ports near top → prefer zone above
+                        zone = (layout['zones'].get((a - 1, a))
+                                or layout['zones'].get((a, a + 1)))
+                else:
+                    zone = layout['zones'].get((a, b))
+                    if zone is None:
+                        for la in range(a, b):
+                            zone = layout['zones'].get((la, la + 1))
+                            if zone:
+                                break
                 if zone:
                     zone_key = zone
 
