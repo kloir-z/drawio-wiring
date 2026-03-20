@@ -2,7 +2,7 @@
 # Generate a .drawio diagram and convert to PNG for preview.
 #
 # Usage:
-#   tools/preview.sh sandbox/07_onprem/gen_wiring.py
+#   tools/preview.sh sandbox/my_script.py
 #
 # This runs the gen script, then converts the output .drawio to PNG.
 # The PNG is saved next to the .drawio file.

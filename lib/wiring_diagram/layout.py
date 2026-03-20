@@ -518,29 +518,37 @@ def _compute_gap_expansions(topology, ordered, sizes, layers, cables,
 
 
 def _count_cables_per_zone(cables, layers, sorted_layers):
-    """Count cables routed through each adjacent layer pair.
+    """Count weighted cables routed through each adjacent layer pair.
 
     A cable between layers A and B (A < B) is counted once for each
     intermediate pair (A, A+1), (A+1, A+2), ..., (B-1, B).
     Same-layer cables are counted toward the zone below.
 
+    Each cable contributes its strokeWidth / 2 (rounded up) instead of 1,
+    so thick lines (e.g. width=3) reserve proportionally more vertical
+    space in the routing zone.
+
     Returns:
-        dict: (layer_a, layer_b) -> cable count
+        dict: (layer_a, layer_b) -> weighted cable count
     """
+    import re as _re
     counts = {}
     for cable in cables:
         src_l = layers.get(cable.src_device)
         dst_l = layers.get(cable.dst_device)
         if src_l is None or dst_l is None:
             continue
+        m = _re.search(r'strokeWidth=([0-9.]+)', cable.style)
+        w = float(m.group(1)) if m else 2
+        weight = max(1, w * 0.7)
         a, b = min(src_l, dst_l), max(src_l, dst_l)
         if a == b:
             pair = (a, a + 1)
-            counts[pair] = counts.get(pair, 0) + 1
+            counts[pair] = counts.get(pair, 0) + weight
         else:
             for la in range(a, b):
                 pair = (la, la + 1)
-                counts[pair] = counts.get(pair, 0) + 1
+                counts[pair] = counts.get(pair, 0) + weight
     return counts
 
 

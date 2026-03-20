@@ -557,19 +557,43 @@ class Diagram:
             ry = 22 + i * row_h
 
             # Line sample
-            line_id = nid("ll")
             lx1 = pad
             ly = ry + row_h // 2
-            e = ET.SubElement(self.R, "mxCell", id=line_id, value="",
-                style=(f"endArrow=none;startArrow=none;html=1;"
-                       f"fontSize=1;{style_str}"),
-                edge="1", parent=lid)
-            g = ET.SubElement(e, "mxGeometry", relative="1")
-            g.set("as", "geometry")
-            src = ET.SubElement(g, "mxPoint", x=str(lx1), y=str(ly))
-            src.set("as", "sourcePoint")
-            tgt = ET.SubElement(g, "mxPoint", x=str(lx1 + line_w), y=str(ly))
-            tgt.set("as", "targetPoint")
+            base_line = "endArrow=none;startArrow=none;html=1;fontSize=1;"
+
+            double = "double=1" in style_str
+            if double:
+                import re as _re
+                clean = style_str.replace("double=1;", "").replace("double=1", "")
+                # Outer (coloured thick)
+                e_out = ET.SubElement(self.R, "mxCell", id=nid("ll"),
+                    value="", style=f"{base_line}{clean}",
+                    edge="1", parent=lid)
+                g_out = ET.SubElement(e_out, "mxGeometry", relative="1")
+                g_out.set("as", "geometry")
+                ET.SubElement(g_out, "mxPoint", x=str(lx1), y=str(ly)).set("as", "sourcePoint")
+                ET.SubElement(g_out, "mxPoint", x=str(lx1 + line_w), y=str(ly)).set("as", "targetPoint")
+                # Inner (white thin)
+                wm = _re.search(r"strokeWidth=([0-9.]+)", clean)
+                outer_w = float(wm.group(1)) if wm else 4
+                inner_w = max(1, outer_w - 2)
+                inner_style = _re.sub(r"strokeColor=#[0-9a-fA-F]+", "strokeColor=#FFFFFF", clean)
+                inner_style = _re.sub(r"strokeWidth=[0-9.]+", f"strokeWidth={inner_w}", inner_style)
+                e_in = ET.SubElement(self.R, "mxCell", id=nid("ll"),
+                    value="", style=f"{base_line}{inner_style}",
+                    edge="1", parent=lid)
+                g_in = ET.SubElement(e_in, "mxGeometry", relative="1")
+                g_in.set("as", "geometry")
+                ET.SubElement(g_in, "mxPoint", x=str(lx1), y=str(ly)).set("as", "sourcePoint")
+                ET.SubElement(g_in, "mxPoint", x=str(lx1 + line_w), y=str(ly)).set("as", "targetPoint")
+            else:
+                e = ET.SubElement(self.R, "mxCell", id=nid("ll"), value="",
+                    style=f"{base_line}{style_str}",
+                    edge="1", parent=lid)
+                g = ET.SubElement(e, "mxGeometry", relative="1")
+                g.set("as", "geometry")
+                ET.SubElement(g, "mxPoint", x=str(lx1), y=str(ly)).set("as", "sourcePoint")
+                ET.SubElement(g, "mxPoint", x=str(lx1 + line_w), y=str(ly)).set("as", "targetPoint")
 
             # Label
             txt_id = nid("lt")

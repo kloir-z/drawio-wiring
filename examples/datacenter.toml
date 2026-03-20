@@ -4,9 +4,36 @@
 
 [settings]
 router = "obstacle"
-layer_gap = 220
+layer_gap = 120
 device_gap = 25
 cable_layers = true
+
+# ============================================================================
+# Zone groups: split routing zones by cable type
+# ============================================================================
+[[zone_groups]]
+layers = [0, 1]
+groups = [
+    ["core"],
+    ["core2"],
+]
+
+[[zone_groups]]
+layers = [1, 2]
+groups = [
+    ["acc"],
+    ["acc2"],
+    ["leaf"],
+    ["leaf2"],
+    ["svc"],
+    ["svc2"],
+    ["data"],
+    ["data2"],
+    ["vm"],
+    ["vm2"],
+    ["mgmt"],
+    ["mgmt2"],
+]
 
 # ============================================================================
 # Edge styles
@@ -16,6 +43,8 @@ core   = { color = "red",       width = 3 }
 core2  = { color = "red_lt",    width = 3 }
 acc    = { color = "blue",      width = 2 }
 acc2   = { color = "blue_lt",   width = 2 }
+leaf   = { color = "cyan",      width = 2 }
+leaf2  = { color = "cyan_lt",   width = 2 }
 svc    = { color = "orange",    width = 2 }
 svc2   = { color = "orange_lt", width = 2 }
 data   = { color = "green",     width = 2 }
@@ -24,7 +53,7 @@ vm     = { color = "teal",      width = 2 }
 vm2    = { color = "teal_lt",   width = 2 }
 mgmt   = { color = "purple",    width = 1.5, line = "dotted" }
 mgmt2  = { color = "purple_lt", width = 1.5, line = "dotted" }
-stack  = { color = "gray",      width = 2,   line = "dashed" }
+stack  = { color = "gray",      width = 4,   line = "solid;double=1" }
 
 # ============================================================================
 # Port styles
@@ -179,7 +208,7 @@ ports = [
 [[devices]]
 id = "acc1"
 label = "Access-1"
-layer = 2
+layer = 1
 style = "green"
 ports = [
     { name = "u1", style = "up" },
@@ -192,7 +221,7 @@ ports = [
 [[devices]]
 id = "acc2"
 label = "Access-2"
-layer = 2
+layer = 1
 style = "green"
 ports = [
     { name = "u1", style = "up" },
@@ -205,7 +234,7 @@ ports = [
 [[devices]]
 id = "acc3"
 label = "Access-3"
-layer = 2
+layer = 1
 style = "green"
 ports = [
     { name = "u1", style = "up" },
@@ -218,7 +247,7 @@ ports = [
 [[devices]]
 id = "acc4"
 label = "Access-4"
-layer = 2
+layer = 1
 style = "green"
 ports = [
     { name = "u1", style = "up" },
@@ -231,7 +260,7 @@ ports = [
 [[devices]]
 id = "mgmt1"
 label = "Mgmt-SW-1"
-layer = 2
+layer = 1
 style = "green"
 ports = [
     { name = "u1", style = "up" },
@@ -248,7 +277,7 @@ ports = [
 [[devices]]
 id = "mgmt2"
 label = "Mgmt-SW-2"
-layer = 2
+layer = 1
 style = "green"
 ports = [
     { name = "u1", style = "up" },
@@ -268,7 +297,7 @@ ports = [
 [[devices]]
 id = "stor1"
 label = "Storage-A"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "iSCSI"
@@ -291,7 +320,7 @@ ports = [
 [[devices]]
 id = "stor2"
 label = "Storage-B"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "iSCSI"
@@ -314,7 +343,7 @@ ports = [
 [[devices]]
 id = "stor3"
 label = "Storage-C"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "iSCSI"
@@ -340,7 +369,7 @@ ports = [
 [[devices]]
 id = "srv1"
 label = "Server-1"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -369,7 +398,7 @@ ports = [
 [[devices]]
 id = "srv2"
 label = "Server-2"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -398,7 +427,7 @@ ports = [
 [[devices]]
 id = "srv3"
 label = "Server-3"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -427,7 +456,7 @@ ports = [
 [[devices]]
 id = "srv4"
 label = "Server-4"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -459,7 +488,7 @@ ports = [
 [[devices]]
 id = "vmh1"
 label = "VM-Host-1"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -494,7 +523,7 @@ ports = [
 [[devices]]
 id = "vmh2"
 label = "VM-Host-2"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -529,7 +558,7 @@ ports = [
 [[devices]]
 id = "vmh3"
 label = "VM-Host-3"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "OCP"
@@ -567,7 +596,7 @@ ports = [
 [[devices]]
 id = "auth1"
 label = "Auth-1"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "NIC1"
@@ -590,7 +619,7 @@ ports = [
 [[devices]]
 id = "auth2"
 label = "Auth-2"
-layer = 3
+layer = 2
 style = "blue"
 [[devices.cards]]
 name = "NIC1"
@@ -782,41 +811,41 @@ src = ["svc2.d17", "svc2.d18"]
 dst = ["vmh3.ocp2", "vmh2.p3a"]
 style = "vm2"
 
-# -- Access1/2 → Auth NIC1: 1系 (blue) -------------------------------------
+# -- Access1/2 → Auth NIC1: 1系 (cyan) -------------------------------------
 [[cables]]
 src = ["acc1.d1", "acc2.d1"]
 dst = ["auth1.eth1", "auth1.eth2"]
-style = "acc"
+style = "leaf"
 
-# -- Access3/4 → Auth NIC1: 2系 (blue_lt) ----------------------------------
+# -- Access3/4 → Auth NIC1: 2系 (cyan_lt) ----------------------------------
 [[cables]]
 src = ["acc3.d1", "acc4.d1"]
 dst = ["auth2.eth1", "auth2.eth2"]
-style = "acc2"
+style = "leaf2"
 
-# -- Access1/2 → VM Host PCIe1: 1系 (teal) ---------------------------------
+# -- Access1/2 → VM Host PCIe1: 1系 (cyan) ---------------------------------
 [[cables]]
 src = ["acc1.d2", "acc2.d2"]
 dst = ["vmh1.p1a", "vmh2.p1a"]
-style = "vm"
+style = "leaf"
 
-# -- Access3/4 → VM Host PCIe1: 2系 (teal_lt) ------------------------------
+# -- Access3/4 → VM Host PCIe1: 2系 (cyan_lt) ------------------------------
 [[cables]]
 src = ["acc3.d2", "acc4.d2"]
 dst = ["vmh3.p1a", "vmh3.p1b"]
-style = "vm2"
+style = "leaf2"
 
-# -- Access1/2 → Auth NIC2: 1系 (green) ------------------------------------
+# -- Access1/2 → Auth NIC2: 1系 (cyan) ------------------------------------
 [[cables]]
 src = ["acc1.d3", "acc2.d3"]
 dst = ["auth1.eth3", "auth1.eth4"]
-style = "data"
+style = "leaf"
 
-# -- Access3/4 → Auth NIC2: 2系 (green_lt) ---------------------------------
+# -- Access3/4 → Auth NIC2: 2系 (cyan_lt) ---------------------------------
 [[cables]]
 src = ["acc3.d3", "acc4.d3"]
 dst = ["auth2.eth3", "auth2.eth4"]
-style = "data2"
+style = "leaf2"
 
 # -- Mgmt1 → Storage OOB: 1系 (purple dotted) ------------------------------
 [[cables]]
@@ -877,15 +906,78 @@ style = "vm2"
 # ============================================================================
 [[simple_links]]
 devices = ["core1", "core2"]
-label = "StackWise"
+label = ""
 style = "stack"
 
 [[simple_links]]
 devices = ["dist1", "dist2"]
-label = "StackWise"
+label = ""
 style = "stack"
 
 [[simple_links]]
 devices = ["svc1", "svc2"]
-label = "StackWise"
+label = ""
+style = "stack"
+
+# ============================================================================
+# Legend
+# ============================================================================
+[[legend]]
+label = "Core Uplink (1系)"
+style = "core"
+
+[[legend]]
+label = "Core Uplink (2系)"
+style = "core2"
+
+[[legend]]
+label = "Access (1系)"
+style = "acc"
+
+[[legend]]
+label = "Access (2系)"
+style = "acc2"
+
+[[legend]]
+label = "Leaf / Access→Server (1系)"
+style = "leaf"
+
+[[legend]]
+label = "Leaf / Access→Server (2系)"
+style = "leaf2"
+
+[[legend]]
+label = "Service / Storage (1系)"
+style = "svc"
+
+[[legend]]
+label = "Service / Storage (2系)"
+style = "svc2"
+
+[[legend]]
+label = "Data (1系)"
+style = "data"
+
+[[legend]]
+label = "Data (2系)"
+style = "data2"
+
+[[legend]]
+label = "VM Network (1系)"
+style = "vm"
+
+[[legend]]
+label = "VM Network (2系)"
+style = "vm2"
+
+[[legend]]
+label = "Management (1系)"
+style = "mgmt"
+
+[[legend]]
+label = "Management (2系)"
+style = "mgmt2"
+
+[[legend]]
+label = "Stack"
 style = "stack"

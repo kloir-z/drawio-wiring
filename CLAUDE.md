@@ -21,10 +21,12 @@ drawio_infra_py/
 │   ├── layout.py               ← compute_layout()（Sugiyama法 自動レイアウト）
 │   └── graph.py                ← Topology クラス（高レベルグラフ → 自動レイアウト）
 ├── examples/
-│   ├── datacenter.py           ← 大規模サンプル（24機器, 100本ケーブル）
-│   ├── datacenter.toml         ← 同じ構成の TOML 版（toml2drawio 用）
+│   ├── datacenter.toml         ← 大規模サンプル（24機器, 100本ケーブル）
 │   ├── datacenter.drawio       ← 生成済みサンプル出力
-│   └── datacenter.png          ← README 用スクリーンショット
+│   ├── datacenter.png          ← README 用スクリーンショット
+│   ├── small_office.toml       ← 小規模サンプル（4サーバ+ストレージ）
+│   ├── small_office.drawio     ← 生成済みサンプル出力
+│   └── small_office.png        ← スクリーンショット
 ├── tests/
 │   ├── test_diagram.py         ← XML構造テスト
 │   ├── test_routing.py         ← ルーティング特性テスト
@@ -40,9 +42,6 @@ drawio_infra_py/
 ## コマンド
 
 ```bash
-# サンプル図を生成する（Python スクリプト）
-python3 examples/datacenter.py
-
 # サンプル図を生成する（TOML 定義）
 python3 tools/toml2drawio.py examples/datacenter.toml
 
@@ -52,8 +51,8 @@ python3 -m unittest discover -s tests
 # .drawio → PNG プレビュー（要: npm install --prefix tools puppeteer-core）
 node tools/drawio_to_png.mjs examples/datacenter.drawio
 
-# 生成 + プレビュー一括実行
-bash tools/preview.sh examples/datacenter.py
+# 生成 + プレビュー一括実行（Python スクリプト用）
+bash tools/preview.sh sandbox/my_script.py
 
 # ライブラリの API ドキュメント
 head -30 lib/wiring_diagram/__init__.py

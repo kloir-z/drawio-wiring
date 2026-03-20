@@ -479,7 +479,8 @@ def _emit_edge(root, waypoints, src_id, tgt_id, style, label,
                       x=str(round(wx, 1)), y=str(round(wy, 1)))
 
 
-def _spread_vertical_segments(edge_data, pitch, x_tolerance=3):
+def _spread_vertical_segments(edge_data, pitch, x_tolerance=3,
+                              min_y_overlap=20):
     """Spread vertical segments whose X and Y ranges both overlap.
 
     Builds the full path (port → waypoints → port) for each edge and
@@ -488,8 +489,10 @@ def _spread_vertical_segments(edge_data, pitch, x_tolerance=3):
     are fixed.
 
     Only segments from *different* edges whose X values are within
-    *x_tolerance* pixels AND whose Y ranges overlap are grouped and
-    offset.
+    *x_tolerance* pixels AND whose Y ranges overlap by at least
+    *min_y_overlap* pixels are grouped and offset.  Small overlaps
+    (e.g. near bend corners) are ignored because they don't cause
+    visible overlap.
 
     Mutates waypoints in place.
 
@@ -499,6 +502,8 @@ def _spread_vertical_segments(edge_data, pitch, x_tolerance=3):
                      lane_y) tuples.
         pitch:       Pixels between adjacent vertical segments.
         x_tolerance: Max X distance to consider segments overlapping.
+        min_y_overlap: Minimum Y overlap (px) to trigger spreading.
+                       Segments with less overlap are left as-is.
     """
     # Extract all vertical segments from full paths.
     # Each segment: (avg_x, y_min, y_max, edge_index, [waypoint_indices])
@@ -552,8 +557,9 @@ def _spread_vertical_segments(edge_data, pitch, x_tolerance=3):
             # X close enough?
             if abs(xi - xj) > x_tolerance:
                 continue
-            # Y ranges overlap?
-            if yi_min < yj_max and yj_min < yi_max:
+            # Y ranges overlap enough?
+            overlap = min(yi_max, yj_max) - max(yi_min, yj_min)
+            if overlap >= min_y_overlap:
                 union(i, j)
 
     # Collect groups
