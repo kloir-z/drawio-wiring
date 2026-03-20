@@ -89,7 +89,7 @@ head -30 lib/wiring_diagram/__init__.py
 | `D.legend(entries)` | 凡例ボックス追加（`[(label, style), ...]`） |
 | `D.save(path)` | XML書き出し（`flush_edges()` 自動呼び出し） |
 | `nid(prefix)` | 一意 ID 生成 |
-| `PALETTE` | カラーパレット辞書（16色: red〜dark） |
+| `PALETTE` | カラーパレット辞書（16色 + 16色 `_lt` 版: red〜dark, red_lt〜dark_lt） |
 | `LINE_STYLES` | 線種辞書（solid/dashed/dotted/dash-dot/long/short） |
 | `edge_style(color, width, line)` | エッジスタイル文字列生成 |
 | `port_style(color, bold)` | ポートスタイル文字列生成 |
@@ -119,4 +119,4 @@ head -30 lib/wiring_diagram/__init__.py
 | `[[simple_links]]` | StackWise等の直結リンク |
 | `[[legend]]` | 凡例エントリ |
 
-色名は PALETTE の16色（`red`, `blue`, `green` 等）、背景は6色（`yellow`, `green`, `purple`, `red`, `blue`, `gray`）。生の draw.io スタイル文字列（`=` 含む）も直接使用可。
+色名は PALETTE の16色（`red`, `blue`, `green` 等）＋ 各色の薄い版（`red_lt`, `blue_lt` 等、冗長2系パス向け）。背景は6色（`yellow`, `green`, `purple`, `red`, `blue`, `gray`）。生の draw.io スタイル文字列（`=` 含む）も直接使用可。

@@ -10,6 +10,7 @@ from wiring_diagram import Diagram, nid, reset_ids, BG_BLUE, PORT_BLUE, EDGE_BLU
 from wiring_diagram.routing import (
     NaiveRouter, LeftEdgeRouter, ObstacleRouter,
     _find_blocking, _detour_waypoints, _compute_clear_x,
+    _spread_vertical_segments,
 )
 
 
@@ -433,6 +434,115 @@ class TestObstacleRouter(unittest.TestCase):
                     self.assertFalse(overlaps,
                         f"Vertical segment ({x1}, {seg_y_min}..{seg_y_max}) "
                         f"passes through obstacle {obstacle}")
+
+
+class TestSpreadVerticalSegments(unittest.TestCase):
+    """Tests for _spread_vertical_segments full-path extraction."""
+
+    def test_detour_vertical_segments_spread(self):
+        """Two edges detouring the same obstacle should have their
+        clear_x vertical segments separated after spreading."""
+        reset_ids()
+        root = ET.Element("root")
+        # Two edges with same tgt_cx=150, obstacle blocks the target leg
+        # Source at top (y=50), target at bottom (y=500)
+        # Routing zone y=100..180, obstacle at y=250..310 on the tgt leg
+        edges = [
+            (300, 50, 150, 500, "s0", "t0", EDGE_BLUE, ""),
+            (350, 50, 150, 500, "s1", "t1", EDGE_BLUE, ""),
+        ]
+        # Obstacle covers x=100..200 (includes tgt_cx=150), y=250..310
+        obstacle = (100, 250, 100, 60)
+        ObstacleRouter().route(edges, root, 100, 180, obstacles=[obstacle])
+
+        # Extract all waypoints per edge
+        cells = root.findall("mxCell")
+        self.assertEqual(len(cells), 2)
+        edge_wps = []
+        for cell in cells:
+            arr = cell.find("mxGeometry").find("Array")
+            pts = [(float(p.get("x")), float(p.get("y")))
+                   for p in arr.findall("mxPoint")]
+            edge_wps.append(pts)
+
+        # Both edges should have more than 2 waypoints (detour present)
+        self.assertGreater(len(edge_wps[0]), 2,
+            f"Edge 0 should have detour waypoints, got {edge_wps[0]}")
+        self.assertGreater(len(edge_wps[1]), 2,
+            f"Edge 1 should have detour waypoints, got {edge_wps[1]}")
+
+        # Find vertical segments at detour X (not at src_cx or tgt_cx=150)
+        def detour_vert_xs(pts, src_cx, tgt_cx):
+            xs = set()
+            for i in range(len(pts) - 1):
+                x1, y1 = pts[i]
+                x2, y2 = pts[i + 1]
+                if abs(x1 - x2) < 0.5 and abs(y1 - y2) > 0.5:
+                    if abs(x1 - src_cx) > 1 and abs(x1 - tgt_cx) > 1:
+                        xs.add(round(x1, 1))
+            return xs
+
+        det0 = detour_vert_xs(edge_wps[0], 300, 150)
+        det1 = detour_vert_xs(edge_wps[1], 350, 150)
+        # Both should have detour vertical segments
+        self.assertTrue(len(det0) > 0,
+            f"Edge 0 should have detour verticals, wps={edge_wps[0]}")
+        self.assertTrue(len(det1) > 0,
+            f"Edge 1 should have detour verticals, wps={edge_wps[1]}")
+        # The detour X values should be distinct (spread apart)
+        self.assertTrue(det0 != det1,
+            f"Detour vertical X should differ: edge0={det0}, edge1={det1}")
+
+    def test_src_tgt_spreading_still_works(self):
+        """Basic src_cx/tgt_cx vertical spreading should still work
+        with the full-path approach."""
+        # Two edges with same src_cx, no obstacles → verticals at src_cx overlap
+        reset_ids()
+        root = ET.Element("root")
+        edges = [
+            (100, 50, 200, 400, "s0", "t0", EDGE_BLUE, ""),
+            (100, 50, 300, 400, "s1", "t1", EDGE_BLUE, ""),
+        ]
+        ObstacleRouter().route(edges, root, 100, 300, obstacles=[])
+
+        cells = root.findall("mxCell")
+        # Extract src-side waypoint X values (first waypoint of each edge)
+        src_xs = []
+        for cell in cells:
+            arr = cell.find("mxGeometry").find("Array")
+            pts = arr.findall("mxPoint")
+            src_xs.append(float(pts[0].get("x")))
+        # They should be spread (not both exactly 100)
+        self.assertNotEqual(src_xs[0], src_xs[1],
+            f"Source vertical X should be spread, got {src_xs}")
+
+    def test_unit_spread_with_detour_waypoints(self):
+        """Unit test: _spread_vertical_segments detects detour verticals."""
+        # Simulate edge_data with detour waypoints at clear_x=72
+        # Edge 0: detour around obstacle, then horizontal, then straight down
+        wp0 = [
+            (150, 192), (72, 192),   # jog to clear_x
+            (72, 258), (150, 258),   # jog back
+            (150, 140), (300, 140),  # horizontal lane
+        ]
+        # Edge 1: same detour path
+        wp1 = [
+            (150, 192), (72, 192),
+            (72, 258), (150, 258),
+            (150, 140), (350, 140),
+        ]
+        edge_data = [
+            (wp0, "s0", "t0", "", "", 1, 0, 150, 300, 50, 400, 140, "1"),
+            (wp1, "s1", "t1", "", "", 1, 0, 150, 350, 50, 400, 140, "1"),
+        ]
+        _spread_vertical_segments(edge_data, 4)
+
+        # The clear_x=72 vertical segments (indices 1,2 in waypoints)
+        # should now be at different X values
+        x0 = wp0[1][0]  # edge 0's clear_x waypoint
+        x1 = wp1[1][0]  # edge 1's clear_x waypoint
+        self.assertNotEqual(x0, x1,
+            f"Detour verticals should be spread: edge0={x0}, edge1={x1}")
 
 
 class TestChannelGapExpansion(unittest.TestCase):

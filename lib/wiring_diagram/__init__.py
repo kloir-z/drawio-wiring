@@ -8,8 +8,11 @@ Use this module when generating complex physical wiring diagrams
 
     from wiring_diagram import Diagram, nid, edge_style, port_style
 
-    # Color palette: red, orange, yellow, lime, green, teal, cyan,
+    # Color palette (16 primary + 16 light):
+    #   red, orange, yellow, lime, green, teal, cyan,
     #   blue, navy, indigo, purple, magenta, pink, brown, gray, dark
+    #   Each has a "_lt" (light) variant for secondary/redundant paths:
+    #   red_lt, orange_lt, blue_lt, ... etc.
     # Line styles: solid, dashed, dotted, dash-dot, long, short
 
     E_10G = edge_style("orange", width=2)

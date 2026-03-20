@@ -12,13 +12,19 @@ cable_layers = true
 # Edge styles
 # ============================================================================
 [edge_styles]
-core  = { color = "red",    width = 3 }
-acc   = { color = "blue",   width = 2 }
-svc   = { color = "orange", width = 2 }
-data  = { color = "green",  width = 2 }
-vm    = { color = "teal",   width = 2 }
-mgmt  = { color = "purple", width = 1.5, line = "dotted" }
-stack = { color = "gray",   width = 2,   line = "dashed" }
+core   = { color = "red",       width = 3 }
+core2  = { color = "red_lt",    width = 3 }
+acc    = { color = "blue",      width = 2 }
+acc2   = { color = "blue_lt",   width = 2 }
+svc    = { color = "orange",    width = 2 }
+svc2   = { color = "orange_lt", width = 2 }
+data   = { color = "green",     width = 2 }
+data2  = { color = "green_lt",  width = 2 }
+vm     = { color = "teal",      width = 2 }
+vm2    = { color = "teal_lt",   width = 2 }
+mgmt   = { color = "purple",    width = 1.5, line = "dotted" }
+mgmt2  = { color = "purple_lt", width = 1.5, line = "dotted" }
+stack  = { color = "gray",      width = 2,   line = "dashed" }
 
 # ============================================================================
 # Port styles
@@ -608,161 +614,263 @@ ports = [
 # Cables (97 routed)
 # ============================================================================
 
-# -- Core → Dist: 4 (red) ---------------------------------------------------
+# -- Core1 → Dist: 1系 (red) ------------------------------------------------
 [[cables]]
-src = ["core1.d1", "core1.d2", "core2.d1", "core2.d2"]
-dst = ["dist1.u1", "dist2.u1", "dist1.u2", "dist2.u2"]
+src = ["core1.d1", "core1.d2"]
+dst = ["dist1.u1", "dist2.u1"]
 style = "core"
 
-# -- Core → Svc: 4 (red) ----------------------------------------------------
+# -- Core2 → Dist: 2系 (red_lt) --------------------------------------------
 [[cables]]
-src = ["core1.d3", "core1.d4", "core2.d3", "core2.d4"]
-dst = ["svc1.u1",  "svc2.u1",  "svc1.u2",  "svc2.u2"]
+src = ["core2.d1", "core2.d2"]
+dst = ["dist1.u2", "dist2.u2"]
+style = "core2"
+
+# -- Core1 → Svc: 1系 (red) ------------------------------------------------
+[[cables]]
+src = ["core1.d3", "core1.d4"]
+dst = ["svc1.u1",  "svc2.u1"]
 style = "core"
 
-# -- Core → Mgmt uplink: 2 (red) --------------------------------------------
+# -- Core2 → Svc: 2系 (red_lt) ---------------------------------------------
 [[cables]]
-src = ["core1.d5", "core2.d5"]
-dst = ["mgmt1.u1", "mgmt2.u1"]
+src = ["core2.d3", "core2.d4"]
+dst = ["svc1.u2",  "svc2.u2"]
+style = "core2"
+
+# -- Core → Mgmt uplink: 1系 (red) -----------------------------------------
+[[cables]]
+src = "core1.d5"
+dst = "mgmt1.u1"
 style = "core"
 
-# -- Core → Server PCIe2: 4 (red) -------------------------------------------
+# -- Core → Mgmt uplink: 2系 (red_lt) --------------------------------------
 [[cables]]
-src = ["core1.d6", "core2.d6", "core1.d7", "core2.d7"]
-dst = ["srv1.p2a", "srv2.p2a", "srv3.p2a", "srv4.p2a"]
+src = "core2.d5"
+dst = "mgmt2.u1"
+style = "core2"
+
+# -- Core1 → Server PCIe2: 1系 (red) ---------------------------------------
+[[cables]]
+src = ["core1.d6", "core1.d7"]
+dst = ["srv1.p2a", "srv3.p2a"]
 style = "core"
 
-# -- Core → VM Host PCIe2: 2 (red) ------------------------------------------
+# -- Core2 → Server PCIe2: 2系 (red_lt) ------------------------------------
 [[cables]]
-src = ["core1.d8", "core2.d8"]
-dst = ["vmh1.p2a", "vmh2.p2a"]
+src = ["core2.d6", "core2.d7"]
+dst = ["srv2.p2a", "srv4.p2a"]
+style = "core2"
+
+# -- Core → VM Host PCIe2: 1系 (red) ---------------------------------------
+[[cables]]
+src = "core1.d8"
+dst = "vmh1.p2a"
 style = "core"
 
-# -- Dist → Access: 8 (blue, dual-homed) ------------------------------------
+# -- Core → VM Host PCIe2: 2系 (red_lt) ------------------------------------
 [[cables]]
-src = ["dist1.d1", "dist1.d2", "dist1.d3", "dist1.d4",
-       "dist2.d1", "dist2.d2", "dist2.d3", "dist2.d4"]
-dst = ["acc1.u1",  "acc2.u1",  "acc3.u1",  "acc4.u1",
-       "acc1.u2",  "acc2.u2",  "acc3.u2",  "acc4.u2"]
+src = "core2.d8"
+dst = "vmh2.p2a"
+style = "core2"
+
+# -- Dist1 → Access: 1系 (blue) --------------------------------------------
+[[cables]]
+src = ["dist1.d1", "dist1.d2", "dist1.d3", "dist1.d4"]
+dst = ["acc1.u1",  "acc2.u1",  "acc3.u1",  "acc4.u1"]
 style = "acc"
 
-# -- Dist → Server PCIe2: 4 (blue) ------------------------------------------
+# -- Dist2 → Access: 2系 (blue_lt) -----------------------------------------
 [[cables]]
-src = ["dist1.d5", "dist2.d5", "dist1.d6", "dist2.d6"]
-dst = ["srv1.p2b", "srv2.p2b", "srv3.p2b", "srv4.p2b"]
+src = ["dist2.d1", "dist2.d2", "dist2.d3", "dist2.d4"]
+dst = ["acc1.u2",  "acc2.u2",  "acc3.u2",  "acc4.u2"]
+style = "acc2"
+
+# -- Dist1 → Server PCIe2: 1系 (blue) --------------------------------------
+[[cables]]
+src = ["dist1.d5", "dist1.d6"]
+dst = ["srv1.p2b", "srv3.p2b"]
 style = "acc"
 
-# -- Dist → VM Host PCIe1: 2 (blue) -----------------------------------------
+# -- Dist2 → Server PCIe2: 2系 (blue_lt) -----------------------------------
 [[cables]]
-src = ["dist1.d7", "dist2.d7"]
-dst = ["vmh2.p1b", "vmh3.p2b"]
+src = ["dist2.d5", "dist2.d6"]
+dst = ["srv2.p2b", "srv4.p2b"]
+style = "acc2"
+
+# -- Dist → VM Host PCIe1: 1系 (blue) --------------------------------------
+[[cables]]
+src = "dist1.d7"
+dst = "vmh2.p1b"
 style = "acc"
 
-# -- Svc → Storage iSCSI: 6 (orange) ----------------------------------------
+# -- Dist → VM Host PCIe1: 2系 (blue_lt) -----------------------------------
 [[cables]]
-src = ["svc1.d1", "svc1.d2", "svc1.d3", "svc2.d1", "svc2.d2", "svc2.d3"]
-dst = ["stor1.e0a", "stor2.e0a", "stor3.e0a", "stor1.e0b", "stor2.e0b", "stor3.e0b"]
+src = "dist2.d7"
+dst = "vmh3.p2b"
+style = "acc2"
+
+# -- Svc1 → Storage iSCSI: 1系 (orange) ------------------------------------
+[[cables]]
+src = ["svc1.d1", "svc1.d2", "svc1.d3"]
+dst = ["stor1.e0a", "stor2.e0a", "stor3.e0a"]
 style = "svc"
 
-# -- Svc → Storage NFS: 6 (orange) ------------------------------------------
+# -- Svc2 → Storage iSCSI: 2系 (orange_lt) ---------------------------------
 [[cables]]
-src = ["svc1.d4", "svc1.d5", "svc1.d6", "svc2.d4", "svc2.d5", "svc2.d6"]
-dst = ["stor1.e1a", "stor2.e1a", "stor3.e1a", "stor1.e1b", "stor2.e1b", "stor3.e1b"]
+src = ["svc2.d1", "svc2.d2", "svc2.d3"]
+dst = ["stor1.e0b", "stor2.e0b", "stor3.e0b"]
+style = "svc2"
+
+# -- Svc1 → Storage NFS: 1系 (orange) --------------------------------------
+[[cables]]
+src = ["svc1.d4", "svc1.d5", "svc1.d6"]
+dst = ["stor1.e1a", "stor2.e1a", "stor3.e1a"]
 style = "svc"
 
-# -- Svc → Server OCP: 8 (green) --------------------------------------------
+# -- Svc2 → Storage NFS: 2系 (orange_lt) -----------------------------------
 [[cables]]
-src = ["svc1.d7",  "svc2.d7",  "svc1.d8",  "svc2.d8",
-       "svc1.d9",  "svc2.d9",  "svc1.d10", "svc2.d10"]
-dst = ["srv1.ocp1", "srv1.ocp2", "srv2.ocp1", "srv2.ocp2",
-       "srv3.ocp1", "srv3.ocp2", "srv4.ocp1", "srv4.ocp2"]
+src = ["svc2.d4", "svc2.d5", "svc2.d6"]
+dst = ["stor1.e1b", "stor2.e1b", "stor3.e1b"]
+style = "svc2"
+
+# -- Svc1 → Server OCP: 1系 (green) ----------------------------------------
+[[cables]]
+src = ["svc1.d7", "svc1.d8", "svc1.d9", "svc1.d10"]
+dst = ["srv1.ocp1", "srv2.ocp1", "srv3.ocp1", "srv4.ocp1"]
 style = "data"
 
-# -- Svc → Server PCIe1: 8 (green) ------------------------------------------
+# -- Svc2 → Server OCP: 2系 (green_lt) -------------------------------------
 [[cables]]
-src = ["svc1.d11", "svc2.d11", "svc1.d12", "svc2.d12",
-       "svc1.d13", "svc2.d13", "svc1.d14", "svc2.d14"]
-dst = ["srv1.p1a", "srv1.p1b", "srv2.p1a", "srv2.p1b",
-       "srv3.p1a", "srv3.p1b", "srv4.p1a", "srv4.p1b"]
+src = ["svc2.d7", "svc2.d8", "svc2.d9", "svc2.d10"]
+dst = ["srv1.ocp2", "srv2.ocp2", "srv3.ocp2", "srv4.ocp2"]
+style = "data2"
+
+# -- Svc1 → Server PCIe1: 1系 (green) --------------------------------------
+[[cables]]
+src = ["svc1.d11", "svc1.d12", "svc1.d13", "svc1.d14"]
+dst = ["srv1.p1a", "srv2.p1a", "srv3.p1a", "srv4.p1a"]
 style = "data"
 
-# -- Svc → VM Host OCP: 4 (teal) --------------------------------------------
+# -- Svc2 → Server PCIe1: 2系 (green_lt) -----------------------------------
 [[cables]]
-src = ["svc1.d15", "svc2.d15", "svc1.d16", "svc2.d16"]
-dst = ["vmh1.ocp1", "vmh1.ocp2", "vmh2.ocp1", "vmh2.ocp2"]
+src = ["svc2.d11", "svc2.d12", "svc2.d13", "svc2.d14"]
+dst = ["srv1.p1b", "srv2.p1b", "srv3.p1b", "srv4.p1b"]
+style = "data2"
+
+# -- Svc1 → VM Host OCP: 1系 (teal) ----------------------------------------
+[[cables]]
+src = ["svc1.d15", "svc1.d16"]
+dst = ["vmh1.ocp1", "vmh2.ocp1"]
 style = "vm"
 
-# -- Svc → VM Host OCP + PCIe: 5 (teal) -------------------------------------
+# -- Svc2 → VM Host OCP: 2系 (teal_lt) -------------------------------------
 [[cables]]
-src = ["svc1.d17", "svc2.d17", "svc1.d18", "svc2.d18", "svc1.d19"]
-dst = ["vmh3.ocp1", "vmh3.ocp2", "vmh1.p3a", "vmh2.p3a", "vmh3.p3a"]
+src = ["svc2.d15", "svc2.d16"]
+dst = ["vmh1.ocp2", "vmh2.ocp2"]
+style = "vm2"
+
+# -- Svc1 → VM Host OCP + PCIe: 1系 (teal) ---------------------------------
+[[cables]]
+src = ["svc1.d17", "svc1.d18", "svc1.d19"]
+dst = ["vmh3.ocp1", "vmh1.p3a", "vmh3.p3a"]
 style = "vm"
 
-# -- Access → Auth NIC1: 4 (blue) -------------------------------------------
+# -- Svc2 → VM Host OCP + PCIe: 2系 (teal_lt) ------------------------------
 [[cables]]
-src = ["acc1.d1", "acc2.d1", "acc3.d1", "acc4.d1"]
-dst = ["auth1.eth1", "auth1.eth2", "auth2.eth1", "auth2.eth2"]
+src = ["svc2.d17", "svc2.d18"]
+dst = ["vmh3.ocp2", "vmh2.p3a"]
+style = "vm2"
+
+# -- Access1/2 → Auth NIC1: 1系 (blue) -------------------------------------
+[[cables]]
+src = ["acc1.d1", "acc2.d1"]
+dst = ["auth1.eth1", "auth1.eth2"]
 style = "acc"
 
-# -- Access → VM Host PCIe1: 4 (teal) ---------------------------------------
+# -- Access3/4 → Auth NIC1: 2系 (blue_lt) ----------------------------------
 [[cables]]
-src = ["acc1.d2", "acc2.d2", "acc3.d2", "acc4.d2"]
-dst = ["vmh1.p1a", "vmh2.p1a", "vmh3.p1a", "vmh3.p1b"]
+src = ["acc3.d1", "acc4.d1"]
+dst = ["auth2.eth1", "auth2.eth2"]
+style = "acc2"
+
+# -- Access1/2 → VM Host PCIe1: 1系 (teal) ---------------------------------
+[[cables]]
+src = ["acc1.d2", "acc2.d2"]
+dst = ["vmh1.p1a", "vmh2.p1a"]
 style = "vm"
 
-# -- Access → Auth NIC2: 4 (green) ------------------------------------------
+# -- Access3/4 → VM Host PCIe1: 2系 (teal_lt) ------------------------------
 [[cables]]
-src = ["acc1.d3", "acc2.d3", "acc3.d3", "acc4.d3"]
-dst = ["auth1.eth3", "auth1.eth4", "auth2.eth3", "auth2.eth4"]
+src = ["acc3.d2", "acc4.d2"]
+dst = ["vmh3.p1a", "vmh3.p1b"]
+style = "vm2"
+
+# -- Access1/2 → Auth NIC2: 1系 (green) ------------------------------------
+[[cables]]
+src = ["acc1.d3", "acc2.d3"]
+dst = ["auth1.eth3", "auth1.eth4"]
 style = "data"
 
-# -- Mgmt1 → Storage OOB: 3 (purple dotted) ---------------------------------
+# -- Access3/4 → Auth NIC2: 2系 (green_lt) ---------------------------------
+[[cables]]
+src = ["acc3.d3", "acc4.d3"]
+dst = ["auth2.eth3", "auth2.eth4"]
+style = "data2"
+
+# -- Mgmt1 → Storage OOB: 1系 (purple dotted) ------------------------------
 [[cables]]
 src = ["mgmt1.d1", "mgmt1.d2", "mgmt1.d3"]
 dst = ["stor1.m1",  "stor2.m1",  "stor3.m1"]
 style = "mgmt"
 
-# -- Mgmt1 → Server iDRAC: 4 (purple dotted) --------------------------------
+# -- Mgmt1 → Server iDRAC: 1系 (purple dotted) -----------------------------
 [[cables]]
 src = ["mgmt1.d4", "mgmt1.d5", "mgmt1.d6", "mgmt1.d7"]
 dst = ["srv1.mgmt", "srv2.mgmt", "srv3.mgmt", "srv4.mgmt"]
 style = "mgmt"
 
-# -- Mgmt1 → Auth iDRAC: 1 (purple dotted) ----------------------------------
+# -- Mgmt1 → Auth iDRAC: 1系 (purple dotted) -------------------------------
 [[cables]]
 src = "mgmt1.d8"
 dst = "auth1.mgmt"
 style = "mgmt"
 
-# -- Mgmt2 → VM Host iDRAC: 3 (purple dotted) -------------------------------
+# -- Mgmt2 → VM Host iDRAC: 2系 (purple_lt dotted) -------------------------
 [[cables]]
 src = ["mgmt2.d1", "mgmt2.d2", "mgmt2.d3"]
 dst = ["vmh1.mgmt", "vmh2.mgmt", "vmh3.mgmt"]
-style = "mgmt"
+style = "mgmt2"
 
-# -- Mgmt2 → Auth iDRAC: 1 (purple dotted) ----------------------------------
+# -- Mgmt2 → Auth iDRAC: 2系 (purple_lt dotted) ----------------------------
 [[cables]]
 src = "mgmt2.d4"
 dst = "auth2.mgmt"
-style = "mgmt"
+style = "mgmt2"
 
-# -- Mgmt2 → VM Host PCIe3: 3 (purple dotted) -------------------------------
+# -- Mgmt2 → VM Host PCIe3: 2系 (purple_lt dotted) -------------------------
 [[cables]]
 src = ["mgmt2.d5", "mgmt2.d6", "mgmt2.d7"]
 dst = ["vmh1.p3b",  "vmh2.p3b",  "vmh3.p3b"]
-style = "mgmt"
+style = "mgmt2"
 
-# -- Mgmt2 → VM Host backup: 1 (purple dotted) ------------------------------
+# -- Mgmt2 → VM Host backup: 2系 (purple_lt dotted) ------------------------
 [[cables]]
 src = "mgmt2.d8"
 dst = "vmh3.p2a"
-style = "mgmt"
+style = "mgmt2"
 
-# -- Svc → VM Host PCIe remaining: 2 (teal) ---------------------------------
+# -- Svc1 → VM Host PCIe remaining: 1系 (teal) -----------------------------
 [[cables]]
-src = ["svc1.d21", "svc2.d21"]
-dst = ["vmh1.p2b", "vmh2.p2b"]
+src = "svc1.d21"
+dst = "vmh1.p2b"
 style = "vm"
+
+# -- Svc2 → VM Host PCIe remaining: 2系 (teal_lt) --------------------------
+[[cables]]
+src = "svc2.d21"
+dst = "vmh2.p2b"
+style = "vm2"
 
 # ============================================================================
 # StackWise links (3)

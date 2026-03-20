@@ -5,7 +5,8 @@ import xml.etree.ElementTree as ET
 
 from .ids import nid
 from .styles import CARD_STYLE, CTRL_STYLE, SFP_STYLE
-from .routing import NaiveRouter
+from .routing import (NaiveRouter, ObstacleRouter,
+                      _spread_vertical_segments, _straighten_port_entry)
 
 
 def _label_h(label, container_w, font_size=11, h_pad=16):
@@ -430,23 +431,45 @@ class Diagram:
             for edge in edges:
                 zone_groups.setdefault(zone, []).append((edge, layer_name))
 
-        for zone, edge_layer_pairs in zone_groups.items():
-            if not edge_layer_pairs:
-                continue
-            edges = [pair[0] for pair in edge_layer_pairs]
-            layer_names = [pair[1] for pair in edge_layer_pairs]
+        # For ObstacleRouter: two-phase approach to spread verticals
+        # across ALL zones before emitting.
+        if isinstance(self.router, ObstacleRouter):
+            all_edge_data = []
+            for zone, edge_layer_pairs in zone_groups.items():
+                if not edge_layer_pairs:
+                    continue
+                edges = [pair[0] for pair in edge_layer_pairs]
+                layer_names = [pair[1] for pair in edge_layer_pairs]
+                if zone is not None:
+                    y_min, y_max = zone
+                else:
+                    y_min, y_max = self.route_y_min, self.route_y_max
+                parent_ids = [self._get_layer_id(ln) for ln in layer_names]
+                edge_data = self.router.build_edge_data(
+                    edges, y_min, y_max,
+                    obstacles=self._device_boxes,
+                    parent_ids=parent_ids)
+                all_edge_data.extend(edge_data)
 
-            if zone is not None:
-                y_min, y_max = zone
-            else:
-                y_min, y_max = self.route_y_min, self.route_y_max
-
-            # Resolve parent_ids (one per edge, in the same order as edges)
-            parent_ids = [self._get_layer_id(ln) for ln in layer_names]
-
-            self.router.route(edges, self.R, y_min, y_max,
-                              obstacles=self._device_boxes,
-                              parent_ids=parent_ids)
+            _spread_vertical_segments(
+                all_edge_data, self.router.VERTICAL_PITCH,
+                x_tolerance=self.router.VERTICAL_TOLERANCE)
+            _straighten_port_entry(all_edge_data)
+            self.router.emit_edge_data(all_edge_data, self.R)
+        else:
+            for zone, edge_layer_pairs in zone_groups.items():
+                if not edge_layer_pairs:
+                    continue
+                edges = [pair[0] for pair in edge_layer_pairs]
+                layer_names = [pair[1] for pair in edge_layer_pairs]
+                if zone is not None:
+                    y_min, y_max = zone
+                else:
+                    y_min, y_max = self.route_y_min, self.route_y_max
+                parent_ids = [self._get_layer_id(ln) for ln in layer_names]
+                self.router.route(edges, self.R, y_min, y_max,
+                                  obstacles=self._device_boxes,
+                                  parent_ids=parent_ids)
         self._edge_zones.clear()
 
     def legend(self, entries, x=None, y=None, title="Legend"):

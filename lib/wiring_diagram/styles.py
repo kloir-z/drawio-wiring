@@ -2,6 +2,7 @@
 # Rich color palette for wiring diagrams. Pick colors from here when scripting.
 # Each entry: (edge strokeColor, port fillColor, port strokeColor)
 PALETTE = {
+    # ── Primary (1系) ──
     "red":         ("#E03030", "#f8cecc", "#b85450"),
     "orange":      ("#FF8000", "#ffe6cc", "#d79b00"),
     "yellow":      ("#D6B656", "#fff2cc", "#d6b656"),
@@ -18,6 +19,23 @@ PALETTE = {
     "brown":       ("#8B5E3C", "#efdbcb", "#795548"),
     "gray":        ("#888888", "#f5f5f5", "#999999"),
     "dark":        ("#444444", "#e0e0e0", "#555555"),
+    # ── Light (2系) ──
+    "red_lt":      ("#F08080", "#fde8e8", "#d4807a"),
+    "orange_lt":   ("#FFB366", "#fff2e0", "#e0a840"),
+    "yellow_lt":   ("#E8D48A", "#fffbeb", "#d6c47a"),
+    "lime_lt":     ("#A8D480", "#f0fadf", "#9ac47a"),
+    "green_lt":    ("#82C882", "#e4f4e4", "#6aaa6a"),
+    "teal_lt":     ("#66CBC4", "#e0f8f6", "#4aada6"),
+    "cyan_lt":     ("#66D0F8", "#e8f8ff", "#4ab0d8"),
+    "blue_lt":     ("#60A0D8", "#e4f0ff", "#7aaccc"),
+    "navy_lt":     ("#7A8FC0", "#d6e0f0", "#6a80b0"),
+    "indigo_lt":   ("#9080D0", "#e8e0f8", "#8070c0"),
+    "purple_lt":   ("#B8A0C8", "#f0e8f4", "#a890b8"),
+    "magenta_lt":  ("#E080C0", "#fce8f4", "#c860a0"),
+    "pink_lt":     ("#F8A0B8", "#fef0f4", "#e08898"),
+    "brown_lt":    ("#B89878", "#f6ede4", "#a08870"),
+    "gray_lt":     ("#B0B0B0", "#fafafa", "#bbbbbb"),
+    "dark_lt":     ("#808080", "#eeeeee", "#909090"),
 }
 
 
@@ -26,7 +44,7 @@ PALETTE = {
 LINE_STYLES = {
     "solid":    None,           # ────────────
     "dashed":   "8 4",          # ── ── ── ──
-    "dotted":   "2 3",          # ·· ·· ·· ··
+    "dotted":   "3 1",          # ·· ·· ·· ··
     "dash-dot": "8 3 2 3",      # ──·──·──·──
     "long":     "12 6",         # ———  ———  ——
     "short":    "4 3",          # ─ ─ ─ ─ ─ ─

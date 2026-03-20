@@ -12,11 +12,15 @@ cable_layers = true
 # Styles
 # ============================================================================
 [edge_styles]
-uplink = { color = "red",    width = 3 }
-data   = { color = "blue",   width = 2 }
-stor   = { color = "orange", width = 2 }
-mgmt   = { color = "purple", width = 1.5, line = "dotted" }
-stack  = { color = "gray",   width = 2,   line = "dashed" }
+uplink   = { color = "red",       width = 3 }
+uplink2  = { color = "red_lt",    width = 3 }
+data     = { color = "blue",      width = 2 }
+data2    = { color = "blue_lt",   width = 2 }
+stor     = { color = "orange",    width = 2 }
+stor2    = { color = "orange_lt", width = 2 }
+mgmt     = { color = "purple",    width = 1.5, line = "dotted" }
+mgmt2    = { color = "purple_lt", width = 1.5, line = "dotted" }
+stack    = { color = "gray",      width = 2,   line = "dashed" }
 
 [port_styles]
 up   = { color = "red" }
@@ -160,35 +164,53 @@ ports = [
 # Cables (16 routed)
 # ============================================================================
 
-# -- Core → Access uplinks: 4 (red, dual-homed) -----------------------------
+# -- Core → Access uplinks: 1系 (red) ----------------------------------------
 [[cables]]
-src = ["core1.d1", "core1.d2", "core2.d1", "core2.d2"]
-dst = ["acc1.u1",  "acc2.u1",  "acc1.u2",  "acc2.u2"]
+src = ["core1.d1", "core1.d2"]
+dst = ["acc1.u1",  "acc2.u1"]
 style = "uplink"
 
-# -- Access → Server data: 6 (blue, dual-homed) -----------------------------
+# -- Core → Access uplinks: 2系 (red_lt) ------------------------------------
 [[cables]]
-src = ["acc1.d1", "acc2.d1", "acc1.d2", "acc2.d2", "acc1.d3", "acc2.d3"]
-dst = ["srv1.eth1", "srv1.eth2", "srv2.eth1", "srv2.eth2", "srv3.eth1", "srv3.eth2"]
+src = ["core2.d1", "core2.d2"]
+dst = ["acc1.u2",  "acc2.u2"]
+style = "uplink2"
+
+# -- Access → Server data: 1系 (blue) ---------------------------------------
+[[cables]]
+src = ["acc1.d1", "acc1.d2", "acc1.d3"]
+dst = ["srv1.eth1", "srv2.eth1", "srv3.eth1"]
 style = "data"
 
-# -- Access → Storage data: 2 (orange, dual-homed) --------------------------
+# -- Access → Server data: 2系 (blue_lt) ------------------------------------
 [[cables]]
-src = ["acc1.d4", "acc2.d4"]
-dst = ["stor1.e0a", "stor1.e0b"]
+src = ["acc2.d1", "acc2.d2", "acc2.d3"]
+dst = ["srv1.eth2", "srv2.eth2", "srv3.eth2"]
+style = "data2"
+
+# -- Access → Storage data: 1系 (orange) ------------------------------------
+[[cables]]
+src = "acc1.d4"
+dst = "stor1.e0a"
 style = "stor"
 
-# -- Access → Server iDRAC: 3 (purple dotted) -------------------------------
+# -- Access → Storage data: 2系 (orange_lt) ---------------------------------
 [[cables]]
-src = ["acc1.d5", "acc1.d6", "acc2.d5"]
-dst = ["srv1.mgmt", "srv2.mgmt", "srv3.mgmt"]
+src = "acc2.d4"
+dst = "stor1.e0b"
+style = "stor2"
+
+# -- Access → Server iDRAC: 1系 (purple dotted) -----------------------------
+[[cables]]
+src = ["acc1.d5", "acc1.d6"]
+dst = ["srv1.mgmt", "srv2.mgmt"]
 style = "mgmt"
 
-# -- Access → Storage Mgmt: 1 (purple dotted) -------------------------------
+# -- Access → Server/Storage mgmt: 2系 (purple_lt dotted) -------------------
 [[cables]]
-src = "acc2.d6"
-dst = "stor1.m1"
-style = "mgmt"
+src = ["acc2.d5", "acc2.d6"]
+dst = ["srv3.mgmt", "stor1.m1"]
+style = "mgmt2"
 
 # ============================================================================
 # StackWise links (2)
