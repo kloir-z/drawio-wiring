@@ -76,11 +76,19 @@ def _build_edge_style(spec):
     """Build a draw.io style string from a TOML edge-style spec dict."""
     if isinstance(spec, str) and "=" in spec:
         return spec                 # raw passthrough
-    return edge_style(
+    line = spec.get("line", "solid")
+    # Extract extra markers (e.g. "solid;double=1" → line="solid", extras="double=1;")
+    extras = ""
+    if ";" in line:
+        parts = line.split(";")
+        line = parts[0]
+        extras = ";".join(p for p in parts[1:] if p) + ";"
+    s = edge_style(
         spec["color"],
         width=spec.get("width", 2),
-        line=spec.get("line", "solid"),
+        line=line,
     )
+    return s + extras
 
 
 def _build_port_style(spec):
@@ -197,11 +205,12 @@ def build_topology(data):
                 f"cables: src ({len(srcs)}) and dst ({len(dsts)}) "
                 f"length mismatch")
 
+        style_name = cable["style"] if "=" not in cable["style"] else None
         for src, dst in zip(srcs, dsts):
             sd, sp = src.rsplit(".", 1)
             dd, dp = dst.rsplit(".", 1)
             T.add_cable(sd, sp, dd, dp, style=style, label=label,
-                        layer=layer)
+                        layer=layer, style_name=style_name)
 
     # -- Simple links ----------------------------------------------------------
     for link in data.get("simple_links", []):
@@ -213,13 +222,22 @@ def build_topology(data):
             raise ValueError("simple_links.devices must have exactly 2 items")
         T.add_simple_link(devs[0], devs[1], label, style, layer=layer)
 
+    # -- Zone groups -----------------------------------------------------------
+    zg_config = {}
+    for zg in data.get("zone_groups", []):
+        layers = zg["layers"]
+        if len(layers) != 2:
+            raise ValueError("zone_groups.layers must have exactly 2 items")
+        key = (layers[0], layers[1])
+        zg_config[key] = zg["groups"]
+
     # -- Settings --------------------------------------------------------------
     settings = data.get("settings", {})
 
-    return T, settings, edge_styles
+    return T, settings, edge_styles, zg_config
 
 
-def topology_to_diagram(T, settings):
+def topology_to_diagram(T, settings, zone_groups=None):
     """Call T.to_diagram() with parameters from settings dict."""
     router_name = settings.get("router", "obstacle")
     router_cls = _ROUTER_MAP.get(router_name)
@@ -232,7 +250,13 @@ def topology_to_diagram(T, settings):
                 "port_w", "port_h", "page_w", "page_h"):
         if key in settings:
             kwargs[key] = settings[key]
-    kwargs["cable_layers"] = settings.get("cable_layers", False)
+    cl = settings.get("cable_layers", False)
+    # Accept true (bool) or "device"/"style" (str)
+    if cl is True:
+        cl = "device"
+    kwargs["cable_layers"] = cl
+    if zone_groups:
+        kwargs["zone_groups"] = zone_groups
 
     return T.to_diagram(**kwargs)
 
@@ -240,8 +264,8 @@ def topology_to_diagram(T, settings):
 def convert(toml_path, output_path=None):
     """End-to-end: TOML file → .drawio file."""
     data = load_toml(toml_path)
-    T, settings, edge_styles = build_topology(data)
-    D = topology_to_diagram(T, settings)
+    T, settings, edge_styles, zg_config = build_topology(data)
+    D = topology_to_diagram(T, settings, zone_groups=zg_config)
 
     # Legend
     if "legend" in data:

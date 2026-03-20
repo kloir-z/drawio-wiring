@@ -411,8 +411,48 @@ class Diagram:
         self._edge_zones.setdefault(key, []).append(edge)
 
     def simple_edge(self, src_id, tgt_id, label, style_extra, layer=None):
-        """Add a direct edge without waypoints (e.g. stack links)."""
+        """Add a direct edge without waypoints (e.g. stack links).
+
+        If the style contains ``double=1;`` a double-line effect is rendered
+        by drawing a thick outer edge overlaid with a thinner white inner
+        edge.
+        """
+        import re as _re
         parent_id = self._get_layer_id(layer)
+
+        double = "double=1" in style_extra
+        if double:
+            style_extra = style_extra.replace("double=1;", "").replace("double=1", "")
+            # Parse outer width; inner = outer - 2
+            wm = _re.search(r"strokeWidth=([0-9.]+)", style_extra)
+            outer_w = float(wm.group(1)) if wm else 4
+            inner_w = max(1, outer_w - 2)
+            inner_style = _re.sub(
+                r"strokeColor=#[0-9a-fA-F]+", "strokeColor=#FFFFFF",
+                style_extra)
+            inner_style = _re.sub(
+                r"strokeWidth=[0-9.]+", f"strokeWidth={inner_w}",
+                inner_style)
+
+            base = ("rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+                    "fontSize=7;endArrow=none;startArrow=none;")
+            # Outer (coloured thick)
+            e1 = ET.SubElement(self.R, "mxCell", id=nid("e"), value="",
+                style=f"{base}{style_extra}",
+                edge="1", source=src_id, target=tgt_id, parent=parent_id)
+            g1 = ET.SubElement(e1, "mxGeometry", relative="1")
+            g1.set("as", "geometry")
+            # Inner (white thin)
+            e2 = ET.SubElement(self.R, "mxCell", id=nid("e"), value=label,
+                style=f"{base}{inner_style}",
+                edge="1", source=src_id, target=tgt_id, parent=parent_id)
+            g2 = ET.SubElement(e2, "mxGeometry", relative="1")
+            g2.set("as", "geometry")
+            if label:
+                offset = ET.SubElement(g2, "mxPoint", y="-10")
+                offset.set("as", "offset")
+            return
+
         e = ET.SubElement(self.R, "mxCell", id=nid("e"), value=label,
             style=(f"rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
                    f"fontSize=7;endArrow=none;startArrow=none;{style_extra}"),
@@ -489,10 +529,21 @@ class Diagram:
         box_h = 22 + len(entries) * row_h + pad
 
         if x is None:
-            # Place at right edge of page
+            # Place to the right of all devices, with gap
+            if self._device_boxes:
+                max_right = max(bx + bw for bx, _, bw, _ in self._device_boxes)
+                x = max_right + 30
+            else:
+                model = self.mxfile.find(".//mxGraphModel")
+                pw = int(model.get("pageWidth", "1600"))
+                x = pw - box_w - 20
+            # Expand page if legend extends past right edge
             model = self.mxfile.find(".//mxGraphModel")
-            pw = int(model.get("pageWidth", "1600"))
-            x = pw - box_w - 20
+            needed_w = int(x + box_w + 20)
+            cur_pw = int(model.get("pageWidth", "1600"))
+            if needed_w > cur_pw:
+                model.set("pageWidth", str(needed_w))
+                model.set("dx", str(needed_w))
         if y is None:
             y = 20
 

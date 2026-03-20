@@ -661,7 +661,7 @@ class ObstacleRouter(Router):
     DETECT_MARGIN = 0    # X-overlap margin for blocking detection (strict interior)
     DETOUR_PITCH = 6     # spacing between successive detour lines (px)
     VERTICAL_PITCH = 6   # X offset between overlapping vertical segments (px)
-    VERTICAL_TOLERANCE = 3   # X tolerance for grouping vertical segments (px)
+    VERTICAL_TOLERANCE = 2   # X tolerance for grouping vertical segments (px)
 
     def build_edge_data(self, edges, route_y_min, route_y_max,
                         obstacles=None, parent_ids=None):

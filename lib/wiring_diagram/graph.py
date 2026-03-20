@@ -113,6 +113,7 @@ class Cable:
     style: str
     label: str = ""
     layer: str = None
+    style_name: str = None
 
 
 @dataclass
@@ -192,11 +193,12 @@ class Topology:
         return node
 
     def add_cable(self, src_device, src_port, dst_device, dst_port,
-                  style, label="", layer=None):
+                  style, label="", layer=None, style_name=None):
         """Add a cable between two device ports."""
         cable = Cable(src_device=src_device, src_port=src_port,
                       dst_device=dst_device, dst_port=dst_port,
-                      style=style, label=label, layer=layer)
+                      style=style, label=label, layer=layer,
+                      style_name=style_name)
         self.cables.append(cable)
         return cable
 
@@ -226,10 +228,15 @@ class Topology:
         else:
             return max(src_node.label, dst_node.label)
 
+    @staticmethod
+    def _style_layer_name(cable):
+        """Return the style_name as a draw.io layer name."""
+        return cable.style_name or "other"
+
     def to_diagram(self, *, page_w=None, page_h=None, router=None,
                    layer_gap=200, device_gap=30, route_zone_height=None,
                    first_layer_y=30, port_w=14, port_h=12,
-                   cable_layers=False):
+                   cable_layers=False, zone_groups=None):
         """Compute layout and return a populated Diagram.
 
         Args:
@@ -243,8 +250,15 @@ class Topology:
             first_layer_y:     Y offset for the topmost layer.
             port_w:            Default port width.
             port_h:            Default port height.
-            cable_layers:      When True, auto-assign cables to draw.io layers
-                               based on the lower-layer device label.
+            cable_layers:      Auto-assign cables to draw.io layers.
+                               True or "device": group by lower-layer device label.
+                               "style": group by edge style name.
+            zone_groups:       Per-layer-pair cable grouping for sub-zone routing.
+                               dict mapping (layer_a, layer_b) to a list of
+                               style-name groups, e.g.
+                               {(0,1): [["core","core2"], ["acc","acc2"]]}.
+                               Cables whose style_name is not in any group are
+                               collected into an extra catch-all sub-zone.
 
         Returns:
             Diagram with all devices, cables, and simple links placed.
@@ -261,7 +275,7 @@ class Topology:
         layout = compute_layout(
             self, layer_gap=layer_gap, device_gap=device_gap,
             first_layer_y=first_layer_y, port_w=port_w, port_h=port_h,
-            cables=self.cables,
+            cables=self.cables, zone_groups=zone_groups,
         )
 
         # Determine page dimensions
@@ -325,6 +339,65 @@ class Topology:
             for plabel, info in result.items():
                 port_map[(dev_id, plabel)] = info
 
+        # Build sub-zone lookup from zone_groups config
+        # _sub_zones: {(a,b): {style_name: (y_min, y_max)}}
+        #
+        # Pre-count cables per style_name per layer pair, weighted by
+        # line width so thick-line groups get proportionally more space.
+        import re as _re
+
+        def _stroke_width(style_str):
+            m = _re.search(r'strokeWidth=([0-9.]+)', style_str)
+            return float(m.group(1)) if m else 2
+
+        # {(a,b): {style_name: weighted_count}}
+        _style_weights = {}
+        for cable in self.cables:
+            sn = cable.style_name
+            src_l = self.devices[cable.src_device].layer
+            dst_l = self.devices[cable.dst_device].layer
+            if src_l is None or dst_l is None:
+                continue
+            a, b = min(src_l, dst_l), max(src_l, dst_l)
+            pair = (a, a + 1) if a == b else (a, b)
+            w = _stroke_width(cable.style)
+            bucket = _style_weights.setdefault(pair, {})
+            bucket[sn] = bucket.get(sn, 0) + w
+
+        _sub_zones = {}
+        zg = zone_groups or {}
+        for layer_pair, groups in zg.items():
+            base_zone = layout['zones'].get(tuple(layer_pair))
+            if not base_zone:
+                continue
+            y_min, y_max = base_zone
+            pair = tuple(layer_pair)
+            sw = _style_weights.get(pair, {})
+
+            # Compute weight per group (cable_count * line_width)
+            group_weights = []
+            assigned_styles = set()
+            for group in groups:
+                gw = sum(sw.get(sn, 0) for sn in group)
+                group_weights.append(max(1, gw))
+                assigned_styles.update(group)
+            # Catch-all
+            catchall_w = sum(v for sn, v in sw.items()
+                             if sn not in assigned_styles)
+            group_weights.append(max(1, catchall_w))
+
+            total_w = sum(group_weights)
+            mapping = {}
+            y_cur = y_min
+            for gi, group in enumerate(groups):
+                span = (y_max - y_min) * group_weights[gi] / total_w
+                sub = (y_cur, y_cur + span)
+                for sname in group:
+                    mapping[sname] = sub
+                y_cur += span
+            mapping[None] = (y_cur, y_max)
+            _sub_zones[pair] = mapping
+
         # Add cables
         for cable in self.cables:
             src_key = (cable.src_device, cable.src_port)
@@ -348,27 +421,38 @@ class Topology:
                     src_p = dev_placements[cable.src_device]
                     dev_mid_y = src_p['y'] + src_p['h'] / 2
                     if mid_y >= dev_mid_y:
-                        # Ports near bottom → prefer zone below
                         zone = (layout['zones'].get((a, a + 1))
                                 or layout['zones'].get((a - 1, a)))
+                        zone_pair = (a, a + 1) if (a, a + 1) in layout['zones'] else (a - 1, a)
                     else:
-                        # Ports near top → prefer zone above
                         zone = (layout['zones'].get((a - 1, a))
                                 or layout['zones'].get((a, a + 1)))
+                        zone_pair = (a - 1, a) if (a - 1, a) in layout['zones'] else (a, a + 1)
                 else:
                     zone = layout['zones'].get((a, b))
+                    zone_pair = (a, b)
                     if zone is None:
                         for la in range(a, b):
                             zone = layout['zones'].get((la, la + 1))
                             if zone:
+                                zone_pair = (la, la + 1)
                                 break
                 if zone:
-                    zone_key = zone
+                    # Apply sub-zone if zone_groups configured for this pair
+                    if zone_pair in _sub_zones:
+                        mapping = _sub_zones[zone_pair]
+                        sname = cable.style_name
+                        zone_key = mapping.get(sname, mapping[None])
+                    else:
+                        zone_key = zone
 
             # Determine draw.io layer
             layer_name = cable.layer
             if layer_name is None and cable_layers:
-                layer_name = self._auto_layer_name(cable)
+                if cable_layers == "style":
+                    layer_name = self._style_layer_name(cable)
+                else:
+                    layer_name = self._auto_layer_name(cable)
 
             D.add_edge(s_cx, s_cy, d_cx, d_cy, s_pid, d_pid,
                        cable.style, cable.label, zone=zone_key,
@@ -378,7 +462,10 @@ class Topology:
         for link in self.simple_links:
             layer_name = link.layer
             if layer_name is None and cable_layers:
-                layer_name = self._auto_layer_name(link)
+                if cable_layers == "style":
+                    layer_name = "stack"
+                else:
+                    layer_name = self._auto_layer_name(link)
             D.simple_edge(link.src_device, link.dst_device,
                           link.label, link.style, layer=layer_name)
 

@@ -26,7 +26,7 @@ E_VM    = "strokeColor=#00897B;strokeWidth=2;"               # Teal: Svc → VM 
 E_STACK = "strokeColor=#888888;strokeWidth=2;dashed=1;"      # Grey dashed: StackWise
 # Fine dotted lines (management/OOB)
 _DOT    = "dashed=1;dashPattern=1 2;"
-E_MGMT  = f"strokeColor=#9673a6;strokeWidth=1.5;{_DOT}"     # Purple dotted: Mgmt/iDRAC
+E_MGMT  = f"strokeColor=#9673a6;strokeWidth=1.5;{_DOT}"     # Purple dotted: Mgmt/BMC
 
 # -- Port styles ---------------------------------------------------------------
 P_UP   = PORT_RED
@@ -89,17 +89,17 @@ for i in range(1, 4):
                      ("Mgmt",  [("m1",  False, P_MGMT)]),
                  ])
 
-#   Server: OCP(2) + PCIe1(2) + PCIe2(2) + iDRAC(1) = 7 ports
+#   Server: OCP(2) + PCIe1(2) + PCIe2(2) + BMC(1) = 7 ports
 for i in range(1, 5):
     T.add_device(f"srv{i}", label=f"Server-{i}", style=BG_BLUE,
                  layer=3, cards=[
                      ("OCP",   [("ocp1", False, P_SRV), ("ocp2", False, P_SRV)]),
                      ("PCIe1", [("p1a",  False, P_SRV), ("p1b",  False, P_SRV)]),
                      ("PCIe2", [("p2a",  False, P_SRV), ("p2b",  False, P_SRV)]),
-                     ("iDRAC", [("mgmt", False, P_MGMT)]),
+                     ("BMC", [("mgmt", False, P_MGMT)]),
                  ])
 
-#   VM Host: OCP(2) + PCIe1(2) + PCIe2(2) + PCIe3(2) + iDRAC(1) = 9 ports
+#   VM Host: OCP(2) + PCIe1(2) + PCIe2(2) + PCIe3(2) + BMC(1) = 9 ports
 for i in range(1, 4):
     T.add_device(f"vmh{i}", label=f"VM-Host-{i}", style=BG_BLUE,
                  layer=3, cards=[
@@ -107,17 +107,17 @@ for i in range(1, 4):
                      ("PCIe1", [("p1a",  False, P_SRV), ("p1b",  False, P_SRV)]),
                      ("PCIe2", [("p2a",  False, P_SRV), ("p2b",  False, P_SRV)]),
                      ("PCIe3", [("p3a",  False, P_SRV), ("p3b",  False, P_SRV)]),
-                     ("iDRAC", [("mgmt", False, P_MGMT)]),
+                     ("BMC", [("mgmt", False, P_MGMT)]),
                  ])
 
-#   Auth: NIC1(2) + NIC2(2) + iDRAC(1) = 5 ports
+#   Auth: NIC1(2) + NIC2(2) + BMC(1) = 5 ports
 for i in range(1, 3):
     T.add_device(
         f"auth{i}", label=f"Auth-{i}", style=BG_BLUE, layer=3,
         cards=[
             ("NIC1",  [("eth1", False, P_SRV), ("eth2", False, P_SRV)]),
             ("NIC2",  [("eth3", False, P_SRV), ("eth4", False, P_SRV)]),
-            ("iDRAC", [("mgmt", False, P_MGMT)]),
+            ("BMC", [("mgmt", False, P_MGMT)]),
         ])
 
 
@@ -249,18 +249,18 @@ T.add_cable("mgmt1", "d1", "stor1", "m1", style=E_MGMT)
 T.add_cable("mgmt1", "d2", "stor2", "m1", style=E_MGMT)
 T.add_cable("mgmt1", "d3", "stor3", "m1", style=E_MGMT)
 
-# -- Mgmt1 → Server iDRAC: 4 cables (purple dotted) -----------------------------
+# -- Mgmt1 → Server BMC: 4 cables (purple dotted) -----------------------------
 for i in range(1, 5):
     T.add_cable("mgmt1", f"d{3+i}", f"srv{i}", "mgmt", style=E_MGMT)
 
-# -- Mgmt1 → Auth iDRAC: 1 cable (purple dotted) --------------------------------
+# -- Mgmt1 → Auth BMC: 1 cable (purple dotted) --------------------------------
 T.add_cable("mgmt1", "d8", "auth1", "mgmt", style=E_MGMT)
 
-# -- Mgmt2 → VM Host iDRAC: 3 cables (purple dotted) ----------------------------
+# -- Mgmt2 → VM Host BMC: 3 cables (purple dotted) ----------------------------
 for i in range(1, 4):
     T.add_cable("mgmt2", f"d{i}", f"vmh{i}", "mgmt", style=E_MGMT)
 
-# -- Mgmt2 → Auth iDRAC: 1 cable (purple dotted) --------------------------------
+# -- Mgmt2 → Auth BMC: 1 cable (purple dotted) --------------------------------
 T.add_cable("mgmt2", "d4", "auth2", "mgmt", style=E_MGMT)
 
 # -- Mgmt2 → VM Host PCIe3: 3 cables (purple dotted) ----------------------------

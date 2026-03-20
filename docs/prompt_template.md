@@ -56,7 +56,7 @@ T.add_device("srv1", label="Dell R660-1", style=BG_BLUE, layer=1,
                  ("OCP",   [("ocp1", False, PORT_GREEN), ("ocp2", False, PORT_GREEN)]),
                  ("PCIe1", [("pci1", True,  PORT_GREEN), ("pci2", True,  PORT_GREEN)]),
                  # (port_label, has_sfp, PORT_style)
-                 ("iDRAC", [("mgmt", False, PORT_GRAY)]),
+                 ("BMC", [("mgmt", False, PORT_GRAY)]),
              ])
 ```
 

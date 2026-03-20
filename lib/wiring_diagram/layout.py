@@ -140,8 +140,77 @@ def _assign_layers(topology):
     return layers
 
 
+def _natural_sort_key(dev_id):
+    """Extract a sort key that orders by prefix then numeric suffix.
+
+    'core1' -> ('core', 1), 'acc12' -> ('acc', 12), 'sw' -> ('sw', 0)
+    """
+    import re
+    m = re.match(r'^(.*?)(\d+)$', dev_id)
+    if m:
+        return (m.group(1), int(m.group(2)))
+    return (dev_id, 0)
+
+
+def _build_link_groups(topology, layer_groups, layers):
+    """Group devices connected by simple_links or sharing a prefix + layer.
+
+    Devices are grouped when:
+    1. They are connected by a simple_link (e.g. StackWise pair), OR
+    2. They share the same id prefix and layer (e.g. srv1, srv2, srv3).
+
+    Returns:
+        dict: device_id -> group_id (str, the root device_id)
+    """
+    import re
+
+    # Union-find
+    parent = {}
+    for dev_id in topology.devices:
+        parent[dev_id] = dev_id
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    def union(a, b):
+        a, b = find(a), find(b)
+        if a != b:
+            if _natural_sort_key(a) <= _natural_sort_key(b):
+                parent[b] = a
+            else:
+                parent[a] = b
+
+    # Group by simple_links
+    for link in topology.simple_links:
+        if link.src_device in parent and link.dst_device in parent:
+            union(link.src_device, link.dst_device)
+
+    # Group by same prefix + same layer
+    prefix_layer = {}  # (prefix, layer) -> [dev_id, ...]
+    for dev_id in topology.devices:
+        m = re.match(r'^(.*?)\d+$', dev_id)
+        if m:
+            prefix = m.group(1)
+            layer = layers.get(dev_id)
+            prefix_layer.setdefault((prefix, layer), []).append(dev_id)
+
+    for devs in prefix_layer.values():
+        if len(devs) > 1:
+            for d in devs[1:]:
+                union(devs[0], d)
+
+    return {dev_id: find(dev_id) for dev_id in topology.devices}
+
+
 def _order_within_layers(topology, layer_groups, layers):
-    """Reorder devices within each layer using barycenter heuristic.
+    """Reorder devices within each layer.
+
+    1. Group devices connected by simple_links (StackWise pairs).
+    2. Sort groups by barycenter from adjacent layers.
+    3. Within each group, sort by natural numeric order (1, 2, 3...).
 
     Args:
         topology:     The Topology object.
@@ -151,37 +220,71 @@ def _order_within_layers(topology, layer_groups, layers):
     Returns:
         dict: layer_index -> [device_id, ...] (reordered)
     """
-    # Build neighbor map
+    # Build neighbor map (cables only, not simple_links)
     neighbors = {dev_id: [] for dev_id in topology.devices}
     for cable in topology.cables:
         neighbors[cable.src_device].append(cable.dst_device)
         neighbors[cable.dst_device].append(cable.src_device)
 
+    link_groups = _build_link_groups(topology, layer_groups, layers)
+
     sorted_layers = sorted(layer_groups.keys())
 
-    # Initial ordering: preserve insertion order
-    ordered = {layer: list(devs) for layer, devs in layer_groups.items()}
+    # Initial ordering: group by link_group, then natural sort within group
+    ordered = {}
+    for layer, devs in layer_groups.items():
+        # Collect groups for this layer
+        groups = {}
+        for dev_id in devs:
+            gid = link_groups[dev_id]
+            groups.setdefault(gid, []).append(dev_id)
+        # Sort within each group by natural key
+        for gid in groups:
+            groups[gid].sort(key=_natural_sort_key)
+        # Sort groups by the natural key of their first member
+        sorted_gids = sorted(groups.keys(), key=_natural_sort_key)
+        ordered[layer] = []
+        for gid in sorted_gids:
+            ordered[layer].extend(groups[gid])
 
-    # Barycenter iterations (top-down then bottom-up, 2 passes)
+    # Barycenter iterations — sort groups (not individual devices) by
+    # average barycenter, preserving within-group natural order.
     for _ in range(2):
         # Top-down
         for layer in sorted_layers[1:]:
             devs = ordered[layer]
             if not devs:
                 continue
-            # Previous layer positions
             prev_layer = layer - 1
             if prev_layer not in ordered:
                 continue
             prev_pos = {d: i for i, d in enumerate(ordered[prev_layer])}
 
-            def barycenter(dev_id):
-                nbrs = [n for n in neighbors[dev_id] if n in prev_pos]
-                if not nbrs:
-                    return float('inf')
-                return sum(prev_pos[n] for n in nbrs) / len(nbrs)
+            # Collect groups in this layer
+            seen = {}
+            group_order = []
+            for dev_id in devs:
+                gid = link_groups[dev_id]
+                if gid not in seen:
+                    seen[gid] = []
+                    group_order.append(gid)
+                seen[gid].append(dev_id)
 
-            ordered[layer] = sorted(devs, key=barycenter)
+            def group_bary(gid):
+                members = seen[gid]
+                positions = []
+                for d in members:
+                    for n in neighbors[d]:
+                        if n in prev_pos:
+                            positions.append(prev_pos[n])
+                if not positions:
+                    return float('inf')
+                return sum(positions) / len(positions)
+
+            group_order.sort(key=group_bary)
+            ordered[layer] = []
+            for gid in group_order:
+                ordered[layer].extend(seen[gid])
 
         # Bottom-up
         for layer in reversed(sorted_layers[:-1]):
@@ -193,13 +296,30 @@ def _order_within_layers(topology, layer_groups, layers):
                 continue
             next_pos = {d: i for i, d in enumerate(ordered[next_layer])}
 
-            def barycenter_rev(dev_id):
-                nbrs = [n for n in neighbors[dev_id] if n in next_pos]
-                if not nbrs:
-                    return float('inf')
-                return sum(next_pos[n] for n in nbrs) / len(nbrs)
+            seen = {}
+            group_order = []
+            for dev_id in devs:
+                gid = link_groups[dev_id]
+                if gid not in seen:
+                    seen[gid] = []
+                    group_order.append(gid)
+                seen[gid].append(dev_id)
 
-            ordered[layer] = sorted(devs, key=barycenter_rev)
+            def group_bary_rev(gid):
+                members = seen[gid]
+                positions = []
+                for d in members:
+                    for n in neighbors[d]:
+                        if n in next_pos:
+                            positions.append(next_pos[n])
+                if not positions:
+                    return float('inf')
+                return sum(positions) / len(positions)
+
+            group_order.sort(key=group_bary_rev)
+            ordered[layer] = []
+            for gid in group_order:
+                ordered[layer].extend(seen[gid])
 
     return ordered
 
@@ -397,14 +517,43 @@ def _compute_gap_expansions(topology, ordered, sizes, layers, cables,
     return expanded_gaps
 
 
+def _count_cables_per_zone(cables, layers, sorted_layers):
+    """Count cables routed through each adjacent layer pair.
+
+    A cable between layers A and B (A < B) is counted once for each
+    intermediate pair (A, A+1), (A+1, A+2), ..., (B-1, B).
+    Same-layer cables are counted toward the zone below.
+
+    Returns:
+        dict: (layer_a, layer_b) -> cable count
+    """
+    counts = {}
+    for cable in cables:
+        src_l = layers.get(cable.src_device)
+        dst_l = layers.get(cable.dst_device)
+        if src_l is None or dst_l is None:
+            continue
+        a, b = min(src_l, dst_l), max(src_l, dst_l)
+        if a == b:
+            pair = (a, a + 1)
+            counts[pair] = counts.get(pair, 0) + 1
+        else:
+            for la in range(a, b):
+                pair = (la, la + 1)
+                counts[pair] = counts.get(pair, 0) + 1
+    return counts
+
+
 def compute_layout(topology, *, layer_gap=200, device_gap=30,
                    first_layer_y=30, port_w=14, port_h=12,
-                   cables=None, cable_pitch=6):
+                   cables=None, cable_pitch=6, zone_groups=None,
+                   lane_pitch=3):
     """Compute device positions and routing zones.
 
     Args:
         topology:      Topology object with devices and cables.
-        layer_gap:     Vertical distance between layer centers.
+        layer_gap:     Minimum vertical distance between layer centres.
+                       Actual gaps are auto-scaled based on cable count.
         device_gap:    Horizontal gap between devices.
         first_layer_y: Y offset of the topmost layer.
         port_w:        Default port width for size estimation.
@@ -412,6 +561,9 @@ def compute_layout(topology, *, layer_gap=200, device_gap=30,
         cables:        List of Cable objects for transit-aware gap expansion.
                        If None, uses topology.cables.
         cable_pitch:   Extra pixels per transit cable (default 6).
+        zone_groups:   Per-layer-pair cable grouping dict (same as to_diagram).
+                       Used to add sub-zone overhead to gap sizing.
+        lane_pitch:    Pixels of routing zone per cable (default 5).
 
     Returns:
         dict with keys:
@@ -456,6 +608,28 @@ def compute_layout(topology, *, layer_gap=200, device_gap=30,
     # Step 5: Assign X coordinates with per-gap widths
     sorted_layers = sorted(ordered.keys())
 
+    # Compute per-layer-pair vertical gaps based on cable count
+    cable_counts = _count_cables_per_zone(cables, layers, sorted_layers)
+    zg = zone_groups or {}
+    pair_layer_gaps = {}
+    for i in range(len(sorted_layers) - 1):
+        pair = (sorted_layers[i], sorted_layers[i + 1])
+        n_cables = cable_counts.get(pair, 0)
+        # Sub-zone overhead: each sub-zone boundary adds margin
+        n_subzones = len(zg.get(pair, [])) + 1 if pair in zg else 1
+        subzone_overhead = max(0, n_subzones - 1) * 15
+        auto_gap = 50 + n_cables * lane_pitch + subzone_overhead
+        pair_layer_gaps[pair] = max(layer_gap, auto_gap)
+
+    # Compute cumulative Y offsets per layer
+    layer_y = {}
+    layer_y[sorted_layers[0]] = first_layer_y
+    for i in range(len(sorted_layers) - 1):
+        cur_layer = sorted_layers[i]
+        nxt_layer = sorted_layers[i + 1]
+        pair = (cur_layer, nxt_layer)
+        layer_y[nxt_layer] = layer_y[cur_layer] + pair_layer_gaps[pair]
+
     # Compute layer widths with expanded gaps
     layer_widths = {}
     for layer in sorted_layers:
@@ -477,7 +651,7 @@ def compute_layout(topology, *, layer_gap=200, device_gap=30,
         # Center-align this layer
         start_x = (max_width - total_w) / 2 + page_w_margin / 2
         cur_x = start_x
-        y = first_layer_y + layer * layer_gap
+        y = layer_y[layer]
 
         for i, dev_id in enumerate(devs):
             w, h = sizes[dev_id]

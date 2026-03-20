@@ -361,7 +361,7 @@ ports = [
     { name = "p2b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -390,7 +390,7 @@ ports = [
     { name = "p2b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -419,7 +419,7 @@ ports = [
     { name = "p2b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -448,7 +448,7 @@ ports = [
     { name = "p2b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -486,7 +486,7 @@ ports = [
     { name = "p3b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -521,7 +521,7 @@ ports = [
     { name = "p3b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -556,7 +556,7 @@ ports = [
     { name = "p3b", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -582,7 +582,7 @@ ports = [
     { name = "eth4", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -605,7 +605,7 @@ ports = [
     { name = "eth4", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -824,25 +824,25 @@ src = ["mgmt1.d1", "mgmt1.d2", "mgmt1.d3"]
 dst = ["stor1.m1",  "stor2.m1",  "stor3.m1"]
 style = "mgmt"
 
-# -- Mgmt1 → Server iDRAC: 1系 (purple dotted) -----------------------------
+# -- Mgmt1 → Server BMC: 1系 (purple dotted) -----------------------------
 [[cables]]
 src = ["mgmt1.d4", "mgmt1.d5", "mgmt1.d6", "mgmt1.d7"]
 dst = ["srv1.mgmt", "srv2.mgmt", "srv3.mgmt", "srv4.mgmt"]
 style = "mgmt"
 
-# -- Mgmt1 → Auth iDRAC: 1系 (purple dotted) -------------------------------
+# -- Mgmt1 → Auth BMC: 1系 (purple dotted) -------------------------------
 [[cables]]
 src = "mgmt1.d8"
 dst = "auth1.mgmt"
 style = "mgmt"
 
-# -- Mgmt2 → VM Host iDRAC: 2系 (purple_lt dotted) -------------------------
+# -- Mgmt2 → VM Host BMC: 2系 (purple_lt dotted) -------------------------
 [[cables]]
 src = ["mgmt2.d1", "mgmt2.d2", "mgmt2.d3"]
 dst = ["vmh1.mgmt", "vmh2.mgmt", "vmh3.mgmt"]
 style = "mgmt2"
 
-# -- Mgmt2 → Auth iDRAC: 2系 (purple_lt dotted) ----------------------------
+# -- Mgmt2 → Auth BMC: 2系 (purple_lt dotted) ----------------------------
 [[cables]]
 src = "mgmt2.d4"
 dst = "auth2.mgmt"

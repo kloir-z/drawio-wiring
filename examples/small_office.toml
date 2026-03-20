@@ -4,9 +4,30 @@
 
 [settings]
 router = "obstacle"
-layer_gap = 220
+layer_gap = 80
 device_gap = 30
 cable_layers = true
+
+# ============================================================================
+# Zone groups: split routing zones by cable type and path
+# ============================================================================
+[[zone_groups]]
+layers = [0, 1]
+groups = [
+    ["uplink"],
+    ["uplink2"],
+]
+
+[[zone_groups]]
+layers = [1, 2]
+groups = [
+    ["data"],
+    ["data2"],
+    ["stor"],
+    ["stor2"],
+    ["mgmt"],
+    ["mgmt2"],
+]
 
 # ============================================================================
 # Styles
@@ -20,7 +41,7 @@ stor     = { color = "orange",    width = 2 }
 stor2    = { color = "orange_lt", width = 2 }
 mgmt     = { color = "purple",    width = 1.5, line = "dotted" }
 mgmt2    = { color = "purple_lt", width = 1.5, line = "dotted" }
-stack    = { color = "gray",      width = 2,   line = "dashed" }
+stack    = { color = "gray",      width = 4,   line = "solid;double=1" }
 
 [port_styles]
 up   = { color = "red" }
@@ -101,7 +122,7 @@ ports = [
     { name = "eth2", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -118,7 +139,7 @@ ports = [
     { name = "eth2", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -135,7 +156,7 @@ ports = [
     { name = "eth2", style = "srv" },
 ]
 [[devices.cards]]
-name = "iDRAC"
+name = "BMC"
 ports = [
     { name = "mgmt", style = "mgmt" },
 ]
@@ -200,7 +221,7 @@ src = "acc2.d4"
 dst = "stor1.e0b"
 style = "stor2"
 
-# -- Access → Server iDRAC: 1系 (purple dotted) -----------------------------
+# -- Access → Server BMC: 1系 (purple dotted) -----------------------------
 [[cables]]
 src = ["acc1.d5", "acc1.d6"]
 dst = ["srv1.mgmt", "srv2.mgmt"]
@@ -217,10 +238,49 @@ style = "mgmt2"
 # ============================================================================
 [[simple_links]]
 devices = ["core1", "core2"]
-label = "StackWise"
+label = ""
 style = "stack"
 
 [[simple_links]]
 devices = ["acc1", "acc2"]
-label = "StackWise"
+label = ""
+style = "stack"
+
+# ============================================================================
+# Legend
+# ============================================================================
+[[legend]]
+label = "Uplink (1系)"
+style = "uplink"
+
+[[legend]]
+label = "Uplink (2系)"
+style = "uplink2"
+
+[[legend]]
+label = "Data (1系)"
+style = "data"
+
+[[legend]]
+label = "Data (2系)"
+style = "data2"
+
+[[legend]]
+label = "Storage (1系)"
+style = "stor"
+
+[[legend]]
+label = "Storage (2系)"
+style = "stor2"
+
+[[legend]]
+label = "Management (1系)"
+style = "mgmt"
+
+[[legend]]
+label = "Management (2系)"
+style = "mgmt2"
+
+[[legend]]
+label = "Stack"
 style = "stack"

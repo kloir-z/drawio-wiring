@@ -80,14 +80,14 @@ class TestBuildTopology(unittest.TestCase):
         }
 
     def test_topology_devices(self):
-        T, settings, _ = toml2drawio.build_topology(self._minimal_data())
+        T, settings, _, _ = toml2drawio.build_topology(self._minimal_data())
         self.assertIn("sw1", T.devices)
         self.assertIn("srv1", T.devices)
         self.assertFalse(T.devices["sw1"].is_carded)
         self.assertTrue(T.devices["srv1"].is_carded)
 
     def test_topology_cables(self):
-        T, _, _ = toml2drawio.build_topology(self._minimal_data())
+        T, _, _, _ = toml2drawio.build_topology(self._minimal_data())
         self.assertEqual(len(T.cables), 1)
         self.assertEqual(T.cables[0].src_device, "sw1")
         self.assertEqual(T.cables[0].dst_port, "eth0")
@@ -108,7 +108,7 @@ class TestBuildTopology(unittest.TestCase):
              "dst": ["srv1.eth0", "srv1.eth1"],
              "style": "link"},
         ]
-        T, _, _ = toml2drawio.build_topology(data)
+        T, _, _, _ = toml2drawio.build_topology(data)
         self.assertEqual(len(T.cables), 2)
 
     def test_simple_links(self):
@@ -121,7 +121,7 @@ class TestBuildTopology(unittest.TestCase):
             {"devices": ["sw1", "sw2"], "label": "Stack",
              "style": "link"},
         ]
-        T, _, _ = toml2drawio.build_topology(data)
+        T, _, _, _ = toml2drawio.build_topology(data)
         self.assertEqual(len(T.simple_links), 1)
 
     def test_controllers_3level(self):
@@ -136,7 +136,7 @@ class TestBuildTopology(unittest.TestCase):
                      ]},
                  ]},
              ]})
-        T, _, _ = toml2drawio.build_topology(data)
+        T, _, _, _ = toml2drawio.build_topology(data)
         self.assertTrue(T.devices["stor1"].is_3level)
 
     def test_mismatched_bulk_length(self):
