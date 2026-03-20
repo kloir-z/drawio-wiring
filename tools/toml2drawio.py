@@ -10,7 +10,7 @@ If -o is omitted the output path is derived from the input
 TOML schema
 -----------
 See examples/datacenter.toml for a full example and
-docs/toml_schema.md for the reference.
+docs/prompt_template.md for the TOML schema reference.
 """
 
 import argparse

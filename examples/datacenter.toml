@@ -1,4 +1,4 @@
-# datacenter.toml — 24 devices, 100 cables (97 routed + 3 StackWise)
+# datacenter.toml — 23 devices, 105 cables (102 routed + 3 StackWise)
 #
 # Generate:  python3 tools/toml2drawio.py examples/datacenter.toml
 
@@ -169,6 +169,7 @@ ports = [
     { name = "d19", style = "down" },
     { name = "d20", style = "down" },
     { name = "d21", style = "down" },
+    { name = "d22", style = "down" },
 ]
 
 [[devices]]
@@ -272,6 +273,7 @@ ports = [
     { name = "d6", style = "mgmt" },
     { name = "d7", style = "mgmt" },
     { name = "d8", style = "mgmt" },
+    { name = "d9", style = "mgmt" },
 ]
 
 [[devices]]
@@ -292,29 +294,50 @@ ports = [
 ]
 
 # ============================================================================
-# Layer 3: Storage (3) — carded
+# Layer 3: Storage (2) — 3-level (chassis → controller → card → port)
 # ============================================================================
 [[devices]]
 id = "stor1"
 label = "Storage-A"
 layer = 2
 style = "blue"
-[[devices.cards]]
+[[devices.controllers]]
+name = "Ctrl-A"
+[[devices.controllers.cards]]
 name = "iSCSI"
 ports = [
     { name = "e0a", style = "srv" },
     { name = "e0b", style = "srv" },
 ]
-[[devices.cards]]
+[[devices.controllers.cards]]
 name = "NFS"
 ports = [
     { name = "e1a", style = "srv" },
     { name = "e1b", style = "srv" },
 ]
-[[devices.cards]]
+[[devices.controllers.cards]]
 name = "Mgmt"
 ports = [
     { name = "m1", style = "mgmt" },
+]
+[[devices.controllers]]
+name = "Ctrl-B"
+[[devices.controllers.cards]]
+name = "iSCSI"
+ports = [
+    { name = "e2a", style = "srv" },
+    { name = "e2b", style = "srv" },
+]
+[[devices.controllers.cards]]
+name = "NFS"
+ports = [
+    { name = "e3a", style = "srv" },
+    { name = "e3b", style = "srv" },
+]
+[[devices.controllers.cards]]
+name = "Mgmt"
+ports = [
+    { name = "m2", style = "mgmt" },
 ]
 
 [[devices]]
@@ -322,45 +345,43 @@ id = "stor2"
 label = "Storage-B"
 layer = 2
 style = "blue"
-[[devices.cards]]
+[[devices.controllers]]
+name = "Ctrl-A"
+[[devices.controllers.cards]]
 name = "iSCSI"
 ports = [
     { name = "e0a", style = "srv" },
     { name = "e0b", style = "srv" },
 ]
-[[devices.cards]]
+[[devices.controllers.cards]]
 name = "NFS"
 ports = [
     { name = "e1a", style = "srv" },
     { name = "e1b", style = "srv" },
 ]
-[[devices.cards]]
+[[devices.controllers.cards]]
 name = "Mgmt"
 ports = [
     { name = "m1", style = "mgmt" },
 ]
-
-[[devices]]
-id = "stor3"
-label = "Storage-C"
-layer = 2
-style = "blue"
-[[devices.cards]]
+[[devices.controllers]]
+name = "Ctrl-B"
+[[devices.controllers.cards]]
 name = "iSCSI"
 ports = [
-    { name = "e0a", style = "srv" },
-    { name = "e0b", style = "srv" },
+    { name = "e2a", style = "srv" },
+    { name = "e2b", style = "srv" },
 ]
-[[devices.cards]]
+[[devices.controllers.cards]]
 name = "NFS"
 ports = [
-    { name = "e1a", style = "srv" },
-    { name = "e1b", style = "srv" },
+    { name = "e3a", style = "srv" },
+    { name = "e3b", style = "srv" },
 ]
-[[devices.cards]]
+[[devices.controllers.cards]]
 name = "Mgmt"
 ports = [
-    { name = "m1", style = "mgmt" },
+    { name = "m2", style = "mgmt" },
 ]
 
 # ============================================================================
@@ -739,75 +760,99 @@ src = "dist2.d7"
 dst = "vmh3.p2b"
 style = "acc2"
 
-# -- Svc1 → Storage iSCSI: 1系 (orange) ------------------------------------
+# -- Svc1 → Storage iSCSI Ctrl-A: 1系 (orange) ------------------------------
 [[cables]]
-src = ["svc1.d1", "svc1.d2", "svc1.d3"]
-dst = ["stor1.e0a", "stor2.e0a", "stor3.e0a"]
+src = ["svc1.d1", "svc1.d2"]
+dst = ["stor1.e0a", "stor2.e0a"]
 style = "svc"
 
-# -- Svc2 → Storage iSCSI: 2系 (orange_lt) ---------------------------------
+# -- Svc2 → Storage iSCSI Ctrl-A: 2系 (orange_lt) --------------------------
 [[cables]]
-src = ["svc2.d1", "svc2.d2", "svc2.d3"]
-dst = ["stor1.e0b", "stor2.e0b", "stor3.e0b"]
+src = ["svc2.d1", "svc2.d2"]
+dst = ["stor1.e0b", "stor2.e0b"]
 style = "svc2"
 
-# -- Svc1 → Storage NFS: 1系 (orange) --------------------------------------
+# -- Svc1 → Storage iSCSI Ctrl-B: 1系 (orange) ------------------------------
 [[cables]]
-src = ["svc1.d4", "svc1.d5", "svc1.d6"]
-dst = ["stor1.e1a", "stor2.e1a", "stor3.e1a"]
+src = ["svc1.d3", "svc1.d4"]
+dst = ["stor1.e2a", "stor2.e2a"]
 style = "svc"
 
-# -- Svc2 → Storage NFS: 2系 (orange_lt) -----------------------------------
+# -- Svc2 → Storage iSCSI Ctrl-B: 2系 (orange_lt) --------------------------
 [[cables]]
-src = ["svc2.d4", "svc2.d5", "svc2.d6"]
-dst = ["stor1.e1b", "stor2.e1b", "stor3.e1b"]
+src = ["svc2.d3", "svc2.d4"]
+dst = ["stor1.e2b", "stor2.e2b"]
+style = "svc2"
+
+# -- Svc1 → Storage NFS Ctrl-A: 1系 (orange) --------------------------------
+[[cables]]
+src = ["svc1.d5", "svc1.d6"]
+dst = ["stor1.e1a", "stor2.e1a"]
+style = "svc"
+
+# -- Svc2 → Storage NFS Ctrl-A: 2系 (orange_lt) -----------------------------
+[[cables]]
+src = ["svc2.d5", "svc2.d6"]
+dst = ["stor1.e1b", "stor2.e1b"]
+style = "svc2"
+
+# -- Svc1 → Storage NFS Ctrl-B: 1系 (orange) --------------------------------
+[[cables]]
+src = ["svc1.d7", "svc1.d8"]
+dst = ["stor1.e3a", "stor2.e3a"]
+style = "svc"
+
+# -- Svc2 → Storage NFS Ctrl-B: 2系 (orange_lt) -----------------------------
+[[cables]]
+src = ["svc2.d7", "svc2.d8"]
+dst = ["stor1.e3b", "stor2.e3b"]
 style = "svc2"
 
 # -- Svc1 → Server OCP: 1系 (green) ----------------------------------------
 [[cables]]
-src = ["svc1.d7", "svc1.d8", "svc1.d9", "svc1.d10"]
+src = ["svc1.d9", "svc1.d10", "svc1.d11", "svc1.d12"]
 dst = ["srv1.ocp1", "srv2.ocp1", "srv3.ocp1", "srv4.ocp1"]
 style = "data"
 
 # -- Svc2 → Server OCP: 2系 (green_lt) -------------------------------------
 [[cables]]
-src = ["svc2.d7", "svc2.d8", "svc2.d9", "svc2.d10"]
+src = ["svc2.d9", "svc2.d10", "svc2.d11", "svc2.d12"]
 dst = ["srv1.ocp2", "srv2.ocp2", "srv3.ocp2", "srv4.ocp2"]
 style = "data2"
 
 # -- Svc1 → Server PCIe1: 1系 (green) --------------------------------------
 [[cables]]
-src = ["svc1.d11", "svc1.d12", "svc1.d13", "svc1.d14"]
+src = ["svc1.d13", "svc1.d14", "svc1.d15", "svc1.d16"]
 dst = ["srv1.p1a", "srv2.p1a", "srv3.p1a", "srv4.p1a"]
 style = "data"
 
 # -- Svc2 → Server PCIe1: 2系 (green_lt) -----------------------------------
 [[cables]]
-src = ["svc2.d11", "svc2.d12", "svc2.d13", "svc2.d14"]
+src = ["svc2.d13", "svc2.d14", "svc2.d15", "svc2.d16"]
 dst = ["srv1.p1b", "srv2.p1b", "srv3.p1b", "srv4.p1b"]
 style = "data2"
 
 # -- Svc1 → VM Host OCP: 1系 (teal) ----------------------------------------
 [[cables]]
-src = ["svc1.d15", "svc1.d16"]
+src = ["svc1.d17", "svc1.d18"]
 dst = ["vmh1.ocp1", "vmh2.ocp1"]
 style = "vm"
 
 # -- Svc2 → VM Host OCP: 2系 (teal_lt) -------------------------------------
 [[cables]]
-src = ["svc2.d15", "svc2.d16"]
+src = ["svc2.d17", "svc2.d18"]
 dst = ["vmh1.ocp2", "vmh2.ocp2"]
 style = "vm2"
 
 # -- Svc1 → VM Host OCP + PCIe: 1系 (teal) ---------------------------------
 [[cables]]
-src = ["svc1.d17", "svc1.d18", "svc1.d19"]
+src = ["svc1.d19", "svc1.d20", "svc1.d21"]
 dst = ["vmh3.ocp1", "vmh1.p3a", "vmh3.p3a"]
 style = "vm"
 
 # -- Svc2 → VM Host OCP + PCIe: 2系 (teal_lt) ------------------------------
 [[cables]]
-src = ["svc2.d17", "svc2.d18"]
+src = ["svc2.d19", "svc2.d20"]
 dst = ["vmh3.ocp2", "vmh2.p3a"]
 style = "vm2"
 
@@ -847,21 +892,27 @@ src = ["acc3.d3", "acc4.d3"]
 dst = ["auth2.eth3", "auth2.eth4"]
 style = "leaf2"
 
-# -- Mgmt1 → Storage OOB: 1系 (purple dotted) ------------------------------
+# -- Mgmt1 → Storage OOB Ctrl-A: 1系 (purple dotted) -----------------------
 [[cables]]
-src = ["mgmt1.d1", "mgmt1.d2", "mgmt1.d3"]
-dst = ["stor1.m1",  "stor2.m1",  "stor3.m1"]
+src = ["mgmt1.d1", "mgmt1.d2"]
+dst = ["stor1.m1",  "stor2.m1"]
+style = "mgmt"
+
+# -- Mgmt1 → Storage OOB Ctrl-B: 1系 (purple dotted) -----------------------
+[[cables]]
+src = ["mgmt1.d3", "mgmt1.d4"]
+dst = ["stor1.m2",  "stor2.m2"]
 style = "mgmt"
 
 # -- Mgmt1 → Server BMC: 1系 (purple dotted) -----------------------------
 [[cables]]
-src = ["mgmt1.d4", "mgmt1.d5", "mgmt1.d6", "mgmt1.d7"]
+src = ["mgmt1.d5", "mgmt1.d6", "mgmt1.d7", "mgmt1.d8"]
 dst = ["srv1.mgmt", "srv2.mgmt", "srv3.mgmt", "srv4.mgmt"]
 style = "mgmt"
 
 # -- Mgmt1 → Auth BMC: 1系 (purple dotted) -------------------------------
 [[cables]]
-src = "mgmt1.d8"
+src = "mgmt1.d9"
 dst = "auth1.mgmt"
 style = "mgmt"
 
@@ -891,7 +942,7 @@ style = "mgmt2"
 
 # -- Svc1 → VM Host PCIe remaining: 1系 (teal) -----------------------------
 [[cables]]
-src = "svc1.d21"
+src = "svc1.d22"
 dst = "vmh1.p2b"
 style = "vm"
 

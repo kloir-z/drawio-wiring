@@ -1,0 +1,298 @@
+# small_network.toml — 冗長構成のネットワーク配線図サンプル
+#
+# コアスイッチ2台（StackWise）+ アクセススイッチ2台
+# + サーバ2台（Carded）+ ストレージ1台（3段 Controllers）
+# 1系/2系の冗長パスを _lt 色で区別
+#
+# 生成コマンド:
+#   python3 tools/toml2drawio.py docs/samples/small_network.toml
+
+# ============================================================================
+# 1. 全体設定
+# ============================================================================
+[settings]
+router = "obstacle"
+layer_gap = 100              # レイヤー間の垂直距離（px）
+device_gap = 25              # 同一レイヤー内の機器間隔（px）
+cable_layers = true          # draw.io でケーブルをレイヤー分けする
+
+# ============================================================================
+# 2. ゾーングループ（任意）
+#    同じゾーン内のケーブルが同じルーティング領域を共有する。
+#    layers = [上のレイヤー, 下のレイヤー] で対象区間を指定。
+#    groups の中の配列ごとに独立したゾーンになる。
+# ============================================================================
+[[zone_groups]]
+layers = [0, 1]
+groups = [
+    ["uplink"],              # 1系アップリンクだけのゾーン
+    ["uplink2"],             # 2系アップリンクだけのゾーン
+]
+
+[[zone_groups]]
+layers = [1, 2]
+groups = [
+    ["data"],
+    ["data2"],
+    ["stor"],
+    ["stor2"],
+    ["mgmt"],
+]
+
+# ============================================================================
+# 3. エッジスタイル
+#    冗長構成では 1系=通常色、2系=_lt（薄い色）を使い分ける。
+#    例: red → red_lt、blue → blue_lt
+# ============================================================================
+[edge_styles]
+uplink  = { color = "red",       width = 3 }
+uplink2 = { color = "red_lt",    width = 3 }
+data    = { color = "blue",      width = 2 }
+data2   = { color = "blue_lt",   width = 2 }
+stor    = { color = "orange",    width = 2 }
+stor2   = { color = "orange_lt", width = 2 }
+mgmt    = { color = "purple",    width = 1.5, line = "dotted" }
+stack   = { color = "gray",      width = 4,   line = "solid;double=1" }
+
+# ============================================================================
+# 4. ポートスタイル
+# ============================================================================
+[port_styles]
+up   = { color = "red" }
+down = { color = "blue" }
+srv  = { color = "green" }
+mgmt = { color = "gray" }
+
+# ============================================================================
+# 5. デバイス定義
+# ============================================================================
+
+# --- Layer 0: コアスイッチ（Flat）--- StackWise ペア
+[[devices]]
+id = "core1"
+label = "Core-SW-1"
+layer = 0
+style = "purple"
+ports = [
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+]
+
+[[devices]]
+id = "core2"
+label = "Core-SW-2"
+layer = 0
+style = "purple"
+ports = [
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+]
+
+# --- Layer 1: アクセススイッチ（Flat）---
+[[devices]]
+id = "acc1"
+label = "Acc-SW-1"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+]
+
+[[devices]]
+id = "acc2"
+label = "Acc-SW-2"
+layer = 1
+style = "yellow"
+ports = [
+    { name = "u1", style = "up" },
+    { name = "u2", style = "up" },
+    { name = "d1", style = "down" },
+    { name = "d2", style = "down" },
+    { name = "d3", style = "down" },
+    { name = "d4", style = "down" },
+    { name = "d5", style = "down" },
+]
+
+# --- Layer 2: サーバ（Carded: カード → ポートの2段構造）---
+[[devices]]
+id = "srv1"
+label = "Server-1"
+layer = 2
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "BMC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+[[devices]]
+id = "srv2"
+label = "Server-2"
+layer = 2
+style = "blue"
+[[devices.cards]]
+name = "NIC1"
+ports = [
+    { name = "eth1", style = "srv" },
+    { name = "eth2", style = "srv" },
+]
+[[devices.cards]]
+name = "BMC"
+ports = [
+    { name = "mgmt", style = "mgmt" },
+]
+
+# --- Layer 2: ストレージ（Controllers: 筐体 → コントローラ → カード → ポートの3段構造）---
+#
+#   [[devices.controllers]]                ← コントローラ
+#     name = "Ctrl-A"
+#     [[devices.controllers.cards]]        ← そのコントローラ内のカード
+#       name = "iSCSI"
+#       ports = [...]                      ← そのカードのポート
+#
+#   ★ポート名はコントローラ間で重複しないこと！
+#     Ctrl-A: e0a, e0b / Ctrl-B: e2a, e2b のように分ける
+#
+[[devices]]
+id = "stor1"
+label = "Storage-A"
+layer = 2
+style = "green"
+[[devices.controllers]]
+name = "Ctrl-A"
+[[devices.controllers.cards]]
+name = "Data"
+ports = [
+    { name = "e0a", style = "srv" },
+    { name = "e0b", style = "srv" },
+]
+[[devices.controllers.cards]]
+name = "Mgmt"
+ports = [
+    { name = "m1", style = "mgmt" },
+]
+[[devices.controllers]]
+name = "Ctrl-B"
+[[devices.controllers.cards]]
+name = "Data"
+ports = [
+    { name = "e2a", style = "srv" },
+    { name = "e2b", style = "srv" },
+]
+
+# ============================================================================
+# 6. ケーブル定義
+#
+#    一括記法: src と dst を配列にすると、対応する要素同士を接続。
+#    要素数は必ず一致させること。
+# ============================================================================
+
+# -- Core → Access: 1系 (red) --
+[[cables]]
+src = ["core1.d1", "core1.d2"]
+dst = ["acc1.u1",  "acc2.u1"]
+style = "uplink"
+
+# -- Core → Access: 2系 (red_lt) --
+[[cables]]
+src = ["core2.d1", "core2.d2"]
+dst = ["acc1.u2",  "acc2.u2"]
+style = "uplink2"
+
+# -- Access → Server data: 1系 (blue) --
+[[cables]]
+src = ["acc1.d1", "acc1.d2"]
+dst = ["srv1.eth1", "srv2.eth1"]
+style = "data"
+
+# -- Access → Server data: 2系 (blue_lt) --
+[[cables]]
+src = ["acc2.d1", "acc2.d2"]
+dst = ["srv1.eth2", "srv2.eth2"]
+style = "data2"
+
+# -- Access → Storage Ctrl-A: 1系 (orange) --
+[[cables]]
+src = "acc1.d3"
+dst = "stor1.e0a"
+style = "stor"
+
+# -- Access → Storage Ctrl-A: 2系 (orange_lt) --
+[[cables]]
+src = "acc2.d3"
+dst = "stor1.e0b"
+style = "stor2"
+
+# -- Access → Storage Ctrl-B: 1系 (orange) --
+[[cables]]
+src = "acc1.d4"
+dst = "stor1.e2a"
+style = "stor"
+
+# -- Access → Storage Ctrl-B: 2系 (orange_lt) --
+[[cables]]
+src = "acc2.d4"
+dst = "stor1.e2b"
+style = "stor2"
+
+# -- Access → Server/Storage mgmt (purple dotted) --
+[[cables]]
+src = ["acc1.d5", "acc2.d5"]
+dst = ["srv1.mgmt", "srv2.mgmt"]
+style = "mgmt"
+
+# ============================================================================
+# 7. 直結リンク（StackWise 等）
+#    devices にデバイスIDを2つ指定。ルーティングなしで直接接続。
+# ============================================================================
+[[simple_links]]
+devices = ["core1", "core2"]
+label = ""
+style = "stack"
+
+# ============================================================================
+# 8. 凡例
+# ============================================================================
+[[legend]]
+label = "Uplink (1系)"
+style = "uplink"
+
+[[legend]]
+label = "Uplink (2系)"
+style = "uplink2"
+
+[[legend]]
+label = "Data (1系)"
+style = "data"
+
+[[legend]]
+label = "Data (2系)"
+style = "data2"
+
+[[legend]]
+label = "Storage (1系)"
+style = "stor"
+
+[[legend]]
+label = "Storage (2系)"
+style = "stor2"
+
+[[legend]]
+label = "Management"
+style = "mgmt"
+
+[[legend]]
+label = "Stack"
+style = "stack"

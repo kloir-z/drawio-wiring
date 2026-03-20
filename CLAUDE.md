@@ -21,7 +21,7 @@ drawio_infra_py/
 │   ├── layout.py               ← compute_layout()（Sugiyama法 自動レイアウト）
 │   └── graph.py                ← Topology クラス（高レベルグラフ → 自動レイアウト）
 ├── examples/
-│   ├── datacenter.toml         ← 大規模サンプル（24機器, 100本ケーブル）
+│   ├── datacenter.toml         ← 大規模サンプル（23機器, 105本ケーブル）
 │   ├── datacenter.drawio       ← 生成済みサンプル出力
 │   ├── datacenter.png          ← README 用スクリーンショット
 │   ├── small_office.toml       ← 小規模サンプル（4サーバ+ストレージ）
@@ -33,7 +33,10 @@ drawio_infra_py/
 │   ├── test_topology.py        ← Topology API テスト
 │   └── test_toml2drawio.py     ← TOML→drawio 変換テスト
 ├── docs/
-│   └── prompt_template.md      ← AI向けプロンプトテンプレート
+│   ├── toml_guide.md           ← TOML 配線図 作成ガイド（AI向け）
+│   └── samples/                ← コピペ用 TOML サンプル
+│       ├── minimal.toml        ← 最小構成（3台, 2本ケーブル）
+│       └── small_network.toml  ← 冗長構成（7台, 3種デバイス）
 ├── sandbox/                    ← 実験用（.gitignore 済み）
 └── tools/
     └── toml2drawio.py          ← TOML 定義 → .drawio 変換ツール
